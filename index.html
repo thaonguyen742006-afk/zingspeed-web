@@ -1,587 +1,1121 @@
 <!DOCTYPE html>
 <html lang="vi" class="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZingSpeed Mobile - Tournament Group Drawer</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
-    
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    fontFamily: {
-                        orbitron: ['Orbitron', 'sans-serif'],
-                        rajdhani: ['Rajdhani', 'sans-serif'],
-                    },
-                    colors: {
-                        esports: {
-                            bg: '#0b0c10',
-                            card: '#12141d',
-                            accent: '#a855f7',
-                            cyan: '#06b6d4',
-                            neonPink: '#ec4899',
-                            neonGold: '#eab308',
-                            border: '#1f2430'
-                        }
-                    },
-                    boxShadow: {
-                        'neon-purple': '0 0 20px rgba(168, 85, 247, 0.4)',
-                        'neon-cyan': '0 0 20px rgba(6, 182, 212, 0.4)',
-                        'neon-gold': '0 0 15px rgba(234, 179, 8, 0.5)',
-                    }
-                }
-            }
-        }
-    </script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>ZingSpeed Mobile - Chia Bảng & Tính Điểm</title>
 
-    <style>
-        body {
-            background-color: #08090d;
-            background-image: 
-                radial-gradient(circle at 15% 20%, rgba(168, 85, 247, 0.12) 0%, transparent 40%),
-                radial-gradient(circle at 85% 80%, rgba(6, 182, 212, 0.12) 0%, transparent 40%);
-            background-attachment: fixed;
-            font-family: 'Rajdhani', sans-serif;
-            color: #f3f4f6;
-        }
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet"
+ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
 
-        .orbitron { fontFamily: 'Orbitron', sans-serif; }
+<script>
+tailwind.config={
+ darkMode:"class",
+ theme:{
+  extend:{
+   fontFamily:{
+    orbitron:["Orbitron","sans-serif"],
+    rajdhani:["Rajdhani","sans-serif"]
+   }
+  }
+ }
+}
+</script>
 
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #0b0c10;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #2a2e3d;
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #a855f7;
-        }
+<style>
+*{box-sizing:border-box}
 
-        .glass-panel {
-            background: rgba(18, 20, 29, 0.75);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-        }
+body{
+ margin:0;
+ background:
+ radial-gradient(circle at 15% 20%,rgba(168,85,247,.13),transparent 40%),
+ radial-gradient(circle at 85% 80%,rgba(6,182,212,.12),transparent 40%),
+ #08090d;
+ background-attachment:fixed;
+ color:#f3f4f6;
+ font-family:Rajdhani,sans-serif;
+}
 
-        .glow-text-cyan {
-            text-shadow: 0 0 10px rgba(6, 182, 212, 0.7);
-        }
-        .glow-text-purple {
-            text-shadow: 0 0 10px rgba(168, 85, 247, 0.7);
-        }
+.orbitron{font-family:Orbitron,sans-serif}
 
-        @keyframes shufflePulse {
-            0% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.03); opacity: 0.7; filter: hue-rotate(90deg); }
-            100% { transform: scale(1); opacity: 1; }
-        }
+.glass{
+ background:rgba(18,20,29,.78);
+ backdrop-filter:blur(12px);
+ border:1px solid rgba(255,255,255,.08);
+}
 
-        .shuffling {
-            animation: shufflePulse 0.15s infinite alternate;
-        }
-    </style>
+input,textarea{
+ outline:none;
+}
+
+input:focus,textarea:focus{
+ border-color:#06b6d4!important;
+}
+
+.player-card{
+ transition:.2s;
+}
+
+.player-card:hover{
+ transform:translateY(-1px);
+}
+
+.qualified{
+ background:rgba(234,179,8,.07);
+ border-color:rgba(234,179,8,.35)!important;
+}
+
+.eliminated{
+ background:rgba(239,68,68,.13);
+ border-color:rgba(239,68,68,.65)!important;
+}
+
+.eliminated .player-name{
+ color:#f87171;
+}
+
+.rank-number{
+ min-width:32px;
+ height:32px;
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ border-radius:9px;
+ font-weight:900;
+}
+
+.rank-qualified{
+ color:#facc15;
+ background:rgba(234,179,8,.12);
+ border:1px solid rgba(234,179,8,.4);
+}
+
+.rank-eliminated{
+ color:#f87171;
+ background:rgba(239,68,68,.15);
+ border:1px solid rgba(239,68,68,.5);
+}
+
+.rank-normal{
+ color:#9ca3af;
+ background:#111827;
+ border:1px solid #374151;
+}
+
+.badge-out{
+ background:rgba(239,68,68,.15);
+ color:#f87171;
+ border:1px solid rgba(239,68,68,.45);
+}
+
+.badge-in{
+ background:rgba(234,179,8,.12);
+ color:#facc15;
+ border:1px solid rgba(234,179,8,.35);
+}
+
+.toast{
+ transition:.3s;
+}
+</style>
 </head>
-<body class="min-h-screen flex flex-col justify-between selection:bg-purple-500 selection:text-white">
 
-    <header class="border-b border-esports-border/80 glass-panel sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
-            <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-purple-600 to-cyan-500 flex items-center justify-center shadow-neon-purple">
-                    <i class="fa-solid fa-flag-checkered text-xl text-white"></i>
-                </div>
-                <div>
-                    <h1 class="orbitron text-xl sm:text-2xl font-black italic tracking-wider bg-clip-text text-transparent bg-gradient-to-r from-purple-400 via-cyan-400 to-pink-500">
-                        ZINGSPEED MOBILE
-                    </h1>
-                    <p class="text-xs text-gray-400 tracking-widest uppercase font-semibold">Hệ thống Chia Bảng Giải Đấu Esports</p>
-                </div>
-            </div>
+<body class="min-h-screen">
 
-            <div class="flex items-center space-x-2">
-                <button id="resetAppBtn" onclick="resetAllData()" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-800/80 hover:bg-red-900/40 text-gray-300 hover:text-red-400 border border-gray-700 transition-all flex items-center gap-1.5">
-                    <i class="fa-solid fa-rotate-left"></i> <span class="hidden sm:inline">Đặt lại</span>
-                </button>
-            </div>
-        </div>
-    </header>
+<!-- HEADER -->
+<header class="glass sticky top-0 z-50 border-b border-gray-800">
+<div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
 
-    <main class="max-w-7xl mx-auto px-4 py-8 w-full flex-grow grid grid-cols-1 lg:grid-cols-12 gap-8">
-        
-        <section class="lg:col-span-4 space-y-6">
-            <div class="glass-panel p-6 rounded-2xl border-t-2 border-t-purple-500 shadow-xl relative overflow-hidden">
-                <div class="absolute -right-10 -bottom-10 w-32 h-32 bg-purple-600/10 rounded-full blur-2xl pointer-events-none"></div>
+<div class="flex items-center gap-3">
+<div class="w-11 h-11 rounded-xl bg-gradient-to-tr from-purple-600 to-cyan-500 flex items-center justify-center">
+<i class="fa-solid fa-flag-checkered text-xl"></i>
+</div>
 
-                <h2 class="orbitron text-lg font-bold text-white mb-4 flex items-center gap-2">
-                    <i class="fa-solid fa-sliders text-cyan-400"></i> CẤU HÌNH GIẢI ĐẤU
-                </h2>
+<div>
+<h1 class="orbitron font-black text-xl sm:text-2xl italic
+bg-clip-text text-transparent bg-gradient-to-r from-purple-400 via-cyan-400 to-pink-500">
+ZINGSPEED MOBILE
+</h1>
+<p class="text-xs text-gray-400 tracking-widest uppercase">
+Tournament Group System
+</p>
+</div>
+</div>
 
-                <form id="configForm" onsubmit="event.preventDefault(); triggerRandomDraw();" class="space-y-5">
-                    
-                    <!-- Input Mode Toggle -->
-                    <div>
-                        <label class="block text-xs font-bold uppercase tracking-wider text-gray-300 mb-2">Chế độ nhập tuyển thủ</label>
-                        <div class="grid grid-cols-2 gap-2 p-1 bg-black/40 rounded-xl border border-gray-800">
-                            <button type="button" id="modeAutoBtn" onclick="switchInputMode('auto')" class="py-2 rounded-lg text-sm font-bold transition-all bg-purple-600 text-white shadow-md">
-                                <i class="fa-solid fa-robot mr-1"></i> Tự Động
-                            </button>
-                            <button type="button" id="modeManualBtn" onclick="switchInputMode('manual')" class="py-2 rounded-lg text-sm font-bold text-gray-400 hover:text-white transition-all">
-                                <i class="fa-solid fa-list-check mr-1"></i> Thủ Công
-                            </button>
-                        </div>
-                    </div>
+<button onclick="resetAll()"
+class="px-3 py-2 rounded-lg bg-gray-800 hover:bg-red-900/40
+text-gray-300 hover:text-red-400 text-sm">
+<i class="fa-solid fa-rotate-left"></i>
+<span class="hidden sm:inline"> Đặt lại</span>
+</button>
 
-                    <!-- Auto Players Count -->
-                    <div id="autoInputSection">
-                        <label for="playerCountInput" class="block text-xs font-bold uppercase tracking-wider text-gray-300 mb-1">Số lượng Tuyển Thủ</label>
-                        <div class="relative">
-                            <input type="number" id="playerCountInput" min="2" max="256" value="16" class="w-full bg-black/50 border border-gray-700 rounded-xl px-4 py-2.5 text-white font-bold focus:outline-none focus:border-cyan-400 transition-all pl-10" />
-                            <i class="fa-solid fa-users absolute left-3.5 top-3.5 text-gray-500"></i>
-                        </div>
-                        <p class="text-[11px] text-gray-400 mt-1">Sẽ tự tạo danh sách: Tuyển thủ 1, Tuyển thủ 2...</p>
-                    </div>
+</div>
+</header>
 
-                    <!-- Manual Player List -->
-                    <div id="manualInputSection" class="hidden">
-                        <label for="playerListInput" class="block text-xs font-bold uppercase tracking-wider text-gray-300 mb-1">Danh sách tuyển thủ (1 tên/dòng hoặc dấu phẩy)</label>
-                        <textarea id="playerListInput" rows="6" placeholder="SpeedKing&#10;DriftGod_VN&#10;Shadow_ZSM&#10;Racer01, Racer02" class="w-full bg-black/50 border border-gray-700 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-cyan-400 transition-all font-mono resize-none"></textarea>
-                    </div>
 
-                    <!-- Number of Groups -->
-                    <div>
-                        <label for="groupCountInput" class="block text-xs font-bold uppercase tracking-wider text-gray-300 mb-1">Số lượng Bảng Đấu (K)</label>
-                        <div class="relative">
-                            <input type="number" id="groupCountInput" min="1" max="26" value="4" class="w-full bg-black/50 border border-gray-700 rounded-xl px-4 py-2.5 text-white font-bold focus:outline-none focus:border-purple-400 transition-all pl-10" />
-                            <i class="fa-solid fa-sitemap absolute left-3.5 top-3.5 text-gray-500"></i>
-                        </div>
-                    </div>
+<main class="max-w-7xl mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-12 gap-7">
 
-                    <!-- Qualified Count Per Group -->
-                    <div>
-                        <label for="qualifyCountInput" class="block text-xs font-bold uppercase tracking-wider text-gray-300 mb-1">Số người đi tiếp / bảng (Top)</label>
-                        <div class="relative">
-                            <input type="number" id="qualifyCountInput" min="1" max="10" value="2" class="w-full bg-black/50 border border-gray-700 rounded-xl px-4 py-2.5 text-yellow-400 font-bold focus:outline-none focus:border-yellow-400 transition-all pl-10" />
-                            <i class="fa-solid fa-trophy absolute left-3.5 top-3.5 text-yellow-500"></i>
-                        </div>
-                        <p class="text-[11px] text-gray-400 mt-1">Sẽ highlight vàng neon cho các tuyển thủ đủ điều kiện.</p>
-                    </div>
+<!-- LEFT -->
+<section class="lg:col-span-4 space-y-5">
 
-                    <!-- Submit Button -->
-                    <button type="submit" id="drawBtn" class="w-full py-3.5 px-6 rounded-xl orbitron font-black text-sm tracking-widest text-white bg-gradient-to-r from-purple-600 via-pink-600 to-cyan-500 hover:from-purple-500 hover:to-cyan-400 transition-all transform active:scale-95 shadow-neon-purple flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-shuffle"></i> CHIA BẢNG NGẪU NHIÊN
-                    </button>
+<div class="glass rounded-2xl p-6">
 
-                </form>
-            </div>
+<h2 class="orbitron text-lg font-bold mb-5 flex items-center gap-2">
+<i class="fa-solid fa-sliders text-cyan-400"></i>
+CẤU HÌNH GIẢI
+</h2>
 
-            <!-- Stats & Quick Actions Panel -->
-            <div class="glass-panel p-5 rounded-2xl space-y-3">
-                <h3 class="text-xs font-bold uppercase tracking-wider text-gray-400">Thống kê nhanh</h3>
-                <div class="grid grid-cols-3 gap-2 text-center">
-                    <div class="bg-black/30 p-2.5 rounded-xl border border-gray-800">
-                        <div class="text-xs text-gray-400">Tổng tuyển thủ</div>
-                        <div id="statTotalPlayers" class="orbitron font-bold text-lg text-cyan-400">0</div>
-                    </div>
-                    <div class="bg-black/30 p-2.5 rounded-xl border border-gray-800">
-                        <div class="text-xs text-gray-400">Số bảng</div>
-                        <div id="statTotalGroups" class="orbitron font-bold text-lg text-purple-400">0</div>
-                    </div>
-                    <div class="bg-black/30 p-2.5 rounded-xl border border-gray-800">
-                        <div class="text-xs text-gray-400">Vào vòng trong</div>
-                        <div id="statTotalQualifiers" class="orbitron font-bold text-lg text-yellow-400">0</div>
-                    </div>
-                </div>
-            </div>
-        </section>
+<!-- MODE -->
+<label class="text-xs uppercase font-bold text-gray-400">
+Chế độ nhập tuyển thủ
+</label>
 
-        <section class="lg:col-span-8 flex flex-col space-y-4">
-            
-            <!-- Toolbar for Results -->
-            <div class="flex flex-wrap items-center justify-between gap-3 glass-panel p-4 rounded-2xl">
-                <div class="flex items-center space-x-2">
-                    <span class="inline-block w-3 h-3 rounded-full bg-cyan-400 animate-pulse"></span>
-                    <h2 class="orbitron text-base font-bold text-white tracking-wide">
-                        SƠ ĐỒ BẢNG ĐẤU
-                    </h2>
-                </div>
+<div class="grid grid-cols-2 gap-2 mt-2 mb-5">
+<button id="autoBtn"
+onclick="setMode('auto')"
+class="py-2.5 rounded-lg bg-purple-600 font-bold">
+<i class="fa-solid fa-robot"></i> Tự động
+</button>
 
-                <div class="flex flex-wrap items-center gap-2">
-                    <button onclick="simulateRaceMode()" id="simBtn" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-black transition-all shadow-md flex items-center gap-1.5">
-                        <i class="fa-solid fa-gamepad"></i> Mô Phỏng Kết Quả Đua
-                    </button>
-                    <button onclick="copyAsMarkdown()" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-gray-800 hover:bg-gray-700 text-cyan-400 border border-cyan-500/30 transition-all flex items-center gap-1.5">
-                        <i class="fa-solid fa-code"></i> Copy Markdown
-                    </button>
-                    <button onclick="copyAsText()" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-gray-800 hover:bg-gray-700 text-purple-300 border border-purple-500/30 transition-all flex items-center gap-1.5">
-                        <i class="fa-solid fa-copy"></i> Copy Văn Bản
-                    </button>
-                </div>
-            </div>
+<button id="manualBtn"
+onclick="setMode('manual')"
+class="py-2.5 rounded-lg bg-gray-800 text-gray-400 font-bold">
+<i class="fa-solid fa-list"></i> Thủ công
+</button>
+</div>
 
-            <!-- Groups Cards Container -->
-            <div id="groupsGrid" class="grid grid-cols-1 md:grid-cols-2 gap-5 flex-grow">
-                <!-- Group cards generated dynamically via JS -->
-            </div>
 
-        </section>
+<!-- AUTO -->
+<div id="autoBox">
+<label class="text-xs uppercase font-bold text-gray-400">
+Số lượng tuyển thủ
+</label>
 
-    </main>
+<input id="playerCount"
+type="number"
+min="2"
+max="256"
+value="16"
+class="w-full mt-2 bg-black/50 border border-gray-700
+rounded-xl px-4 py-3 text-white font-bold">
 
-    <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
-        <div class="glass-panel border border-cyan-500/50 text-white px-5 py-3 rounded-xl shadow-2xl flex items-center space-x-3">
-            <i id="toastIcon" class="fa-solid fa-circle-check text-cyan-400 text-lg"></i>
-            <span id="toastMsg" class="text-sm font-semibold">Thông báo</span>
-        </div>
+<p class="text-xs text-gray-500 mt-1">
+Ví dụ: 16 tuyển thủ
+</p>
+</div>
+
+
+<!-- MANUAL -->
+<div id="manualBox" class="hidden">
+<label class="text-xs uppercase font-bold text-gray-400">
+Danh sách tuyển thủ
+</label>
+
+<textarea id="playerList"
+rows="7"
+placeholder="SpeedKing
+DriftGod
+Shadow
+Racer01"
+class="w-full mt-2 bg-black/50 border border-gray-700
+rounded-xl p-3 text-white"></textarea>
+
+<p class="text-xs text-gray-500 mt-1">
+Mỗi tên một dòng hoặc ngăn cách bằng dấu phẩy.
+</p>
+</div>
+
+
+<!-- GROUP -->
+<div class="mt-5">
+<label class="text-xs uppercase font-bold text-gray-400">
+Số lượng bảng
+</label>
+
+<input id="groupCount"
+type="number"
+min="1"
+max="26"
+value="4"
+class="w-full mt-2 bg-black/50 border border-gray-700
+rounded-xl px-4 py-3 text-white font-bold">
+</div>
+
+
+<!-- TOP -->
+<div class="mt-5">
+<label class="text-xs uppercase font-bold text-yellow-400">
+Số người đi tiếp / bảng
+</label>
+
+<input id="qualifyCount"
+type="number"
+min="1"
+max="256"
+value="3"
+class="w-full mt-2 bg-black/50 border border-yellow-700
+rounded-xl px-4 py-3 text-yellow-400 font-bold">
+
+<p class="text-xs text-gray-500 mt-1">
+Ví dụ bảng 4 người → Top 3 đi tiếp,
+người cuối cùng bị loại.
+</p>
+</div>
+
+
+<!-- RANDOM -->
+<button onclick="randomGroups()"
+class="w-full mt-6 py-4 rounded-xl orbitron font-black
+tracking-wide bg-gradient-to-r from-purple-600 via-pink-600 to-cyan-500
+hover:opacity-90">
+<i class="fa-solid fa-shuffle"></i>
+CHIA BẢNG NGẪU NHIÊN
+</button>
+
+</div>
+
+
+<!-- STATS -->
+<div class="glass rounded-2xl p-5">
+
+<h3 class="text-xs uppercase font-bold text-gray-400 mb-3">
+Thống kê
+</h3>
+
+<div class="grid grid-cols-3 gap-2 text-center">
+
+<div class="bg-black/30 rounded-xl p-3">
+<div class="text-xs text-gray-500">Tuyển thủ</div>
+<div id="totalPlayers" class="orbitron text-xl font-bold text-cyan-400">
+0
+</div>
+</div>
+
+<div class="bg-black/30 rounded-xl p-3">
+<div class="text-xs text-gray-500">Bảng</div>
+<div id="totalGroups" class="orbitron text-xl font-bold text-purple-400">
+0
+</div>
+</div>
+
+<div class="bg-black/30 rounded-xl p-3">
+<div class="text-xs text-gray-500">Đi tiếp</div>
+<div id="totalQualified" class="orbitron text-xl font-bold text-yellow-400">
+0
+</div>
+</div>
+
+</div>
+</div>
+
+</section>
+
+
+<!-- RIGHT -->
+<section class="lg:col-span-8">
+
+<div class="glass rounded-2xl p-4 mb-5">
+
+<div class="flex flex-wrap justify-between items-center gap-3">
+
+<h2 class="orbitron font-bold flex items-center gap-2">
+<span class="w-3 h-3 rounded-full bg-cyan-400 animate-pulse"></span>
+BẢNG ĐẤU
+</h2>
+
+<div class="flex flex-wrap gap-2">
+
+<button onclick="calculateResults()"
+class="px-4 py-2 rounded-xl bg-gradient-to-r
+from-yellow-500 to-amber-600 text-black font-black text-sm">
+<i class="fa-solid fa-ranking-star"></i>
+TÍNH ĐIỂM & XẾP HẠNG
+</button>
+
+<button onclick="simulate()"
+class="px-4 py-2 rounded-xl bg-orange-600 hover:bg-orange-500
+text-black font-black text-sm">
+<i class="fa-solid fa-gamepad"></i>
+MÔ PHỎNG
+</button>
+
+</div>
+</div>
+
+<div class="flex flex-wrap gap-4 mt-3 text-xs text-gray-400">
+
+<span>
+<span class="inline-block w-3 h-3 bg-yellow-500 rounded mr-1"></span>
+Vàng = đi tiếp
+</span>
+
+<span>
+<span class="inline-block w-3 h-3 bg-red-500 rounded mr-1"></span>
+Đỏ = bị loại
+</span>
+
+<span>
+Nhập điểm → Tính điểm & xếp hạng
+</span>
+
+</div>
+
+</div>
+
+
+<!-- GROUPS -->
+<div id="groups" class="grid grid-cols-1 md:grid-cols-2 gap-5">
+
+<div class="glass rounded-2xl p-10 text-center md:col-span-2">
+
+<i class="fa-solid fa-flag-checkered text-5xl text-gray-700"></i>
+
+<p class="text-gray-500 mt-4">
+Chưa có bảng đấu.
+</p>
+
+<p class="text-gray-600 text-sm mt-1">
+Bấm "Chia bảng ngẫu nhiên" để bắt đầu.
+</p>
+
+</div>
+
+</div>
+
+</section>
+
+</main>
+
+
+<!-- TOAST -->
+<div id="toast"
+class="toast fixed bottom-5 right-5 translate-y-20 opacity-0
+glass rounded-xl px-5 py-3 flex items-center gap-3 z-50">
+
+<i id="toastIcon" class="fa-solid fa-circle-check text-cyan-400"></i>
+<span id="toastText"></span>
+
+</div>
+
+
+<script>
+
+let mode="auto";
+let groups=[];
+
+
+/* =========================
+   MODE
+========================= */
+
+function setMode(value){
+
+ mode=value;
+
+ const autoBox=document.getElementById("autoBox");
+ const manualBox=document.getElementById("manualBox");
+
+ const autoBtn=document.getElementById("autoBtn");
+ const manualBtn=document.getElementById("manualBtn");
+
+ if(value==="auto"){
+
+  autoBox.classList.remove("hidden");
+  manualBox.classList.add("hidden");
+
+  autoBtn.className=
+  "py-2.5 rounded-lg bg-purple-600 font-bold";
+
+  manualBtn.className=
+  "py-2.5 rounded-lg bg-gray-800 text-gray-400 font-bold";
+
+ }else{
+
+  autoBox.classList.add("hidden");
+  manualBox.classList.remove("hidden");
+
+  manualBtn.className=
+  "py-2.5 rounded-lg bg-purple-600 font-bold";
+
+  autoBtn.className=
+  "py-2.5 rounded-lg bg-gray-800 text-gray-400 font-bold";
+ }
+}
+
+
+/* =========================
+   GET PLAYERS
+========================= */
+
+function getPlayers(){
+
+ let players=[];
+
+ if(mode==="auto"){
+
+  let count=parseInt(
+   document.getElementById("playerCount").value
+  )||16;
+
+  count=Math.max(2,Math.min(256,count));
+
+  for(let i=1;i<=count;i++){
+
+   players.push({
+    name:"Tuyển thủ "+i,
+    points:0,
+    rank:null,
+    status:null
+   });
+
+  }
+
+ }else{
+
+  players=document
+   .getElementById("playerList")
+   .value
+   .split(/[\n,]+/)
+   .map(x=>x.trim())
+   .filter(Boolean)
+   .map(name=>({
+    name,
+    points:0,
+    rank:null,
+    status:null
+   }));
+
+ }
+
+ return players;
+}
+
+
+/* =========================
+   RANDOM SHUFFLE
+========================= */
+
+function shuffle(array){
+
+ const arr=[...array];
+
+ for(let i=arr.length-1;i>0;i--){
+
+  const j=Math.floor(Math.random()*(i+1));
+
+  [arr[i],arr[j]]=[arr[j],arr[i]];
+
+ }
+
+ return arr;
+}
+
+
+/* =========================
+   RANDOM GROUP
+========================= */
+
+function randomGroups(){
+
+ const players=getPlayers();
+
+ if(players.length<2){
+
+  toast("Cần ít nhất 2 tuyển thủ!","error");
+  return;
+ }
+
+ let groupCount=parseInt(
+  document.getElementById("groupCount").value
+ )||1;
+
+ groupCount=Math.max(
+  1,
+  Math.min(groupCount,players.length)
+ );
+
+ document.getElementById("groupCount").value=groupCount;
+
+ const shuffled=shuffle(players);
+
+ groups=[];
+
+ for(let i=0;i<groupCount;i++){
+
+  groups.push({
+   name:"BẢNG "+String.fromCharCode(65+i),
+   players:[]
+  });
+
+ }
+
+ /*
+  Chia lần lượt để các bảng có số người
+  gần bằng nhau.
+ */
+
+ shuffled.forEach((player,index)=>{
+
+  groups[index%groupCount].players.push(player);
+
+ });
+
+ render();
+
+ toast("Đã random chia bảng thành công!");
+
+}
+
+
+/* =========================
+   RENDER
+========================= */
+
+function render(){
+
+ const container=document.getElementById("groups");
+
+ container.innerHTML="";
+
+ let totalPlayers=0;
+ let totalQualified=0;
+
+ const qualify=parseInt(
+  document.getElementById("qualifyCount").value
+ )||3;
+
+
+ groups.forEach((group,gIndex)=>{
+
+  totalPlayers+=group.players.length;
+
+  const allowed=Math.min(
+   qualify,
+   group.players.length
+  );
+
+  totalQualified+=allowed;
+
+
+  const card=document.createElement("div");
+
+  card.className=
+  "glass rounded-2xl overflow-hidden";
+
+
+  let html=`
+
+  <div class="p-4 border-b border-gray-800
+  bg-gradient-to-r from-purple-900/30 to-black/30
+  flex justify-between items-center">
+
+   <div class="flex items-center gap-2">
+
+    <i class="fa-solid fa-trophy text-purple-400"></i>
+
+    <h3 class="orbitron font-black text-lg">
+     ${escapeHtml(group.name)}
+    </h3>
+
+   </div>
+
+   <span class="text-xs bg-purple-500/10
+   text-purple-300 border border-purple-500/30
+   rounded-full px-3 py-1">
+    ${group.players.length} người
+   </span>
+
+  </div>
+
+  <div class="p-4 space-y-2">
+  `;
+
+
+  group.players.forEach((player,pIndex)=>{
+
+   const eliminated=player.status==="eliminated";
+   const qualified=player.status==="qualified";
+
+   let rowClass="bg-black/30 border-gray-800";
+
+   if(eliminated){
+    rowClass="eliminated";
+   }else if(qualified){
+    rowClass="qualified";
+   }
+
+   let rankClass="rank-normal";
+
+   if(eliminated){
+    rankClass="rank-eliminated";
+   }else if(qualified){
+    rankClass="rank-qualified";
+   }
+
+   let badge="";
+
+   if(eliminated){
+
+    badge=`
+    <span class="badge-out text-[10px] font-black
+    rounded px-2 py-1">
+    BỊ LOẠI
+    </span>`;
+
+   }else if(qualified){
+
+    badge=`
+    <span class="badge-in text-[10px] font-black
+    rounded px-2 py-1">
+    TOP ${pIndex+1} • ĐI TIẾP
+    </span>`;
+
+   }
+
+
+   html+=`
+
+   <div class="player-card ${rowClass}
+   border rounded-xl p-3">
+
+    <div class="flex items-center justify-between gap-3">
+
+     <div class="flex items-center gap-3 min-w-0">
+
+      <div class="rank-number ${rankClass}">
+       ${pIndex+1}
+      </div>
+
+      <div class="min-w-0">
+
+       <div class="player-name font-bold truncate">
+        ${escapeHtml(player.name)}
+       </div>
+
+       <div class="text-[11px] text-gray-500">
+        ${player.rank ? "Hạng "+player.rank : "Chưa tính kết quả"}
+       </div>
+
+      </div>
+
+     </div>
+
+
+     <div class="flex items-center gap-2">
+
+      <label class="text-[10px] text-gray-500">
+       ĐIỂM
+      </label>
+
+      <input
+       type="number"
+       min="0"
+       max="9999"
+       value="${Number(player.points)||0}"
+       data-group="${gIndex}"
+       data-player="${pIndex}"
+       class="score w-20 bg-black/70
+       border border-gray-700 rounded-lg
+       px-2 py-2 text-center text-cyan-300
+       font-bold"
+      >
+
+     </div>
+
     </div>
 
-    <footer class="border-t border-esports-border/60 py-4 glass-panel text-center text-xs text-gray-500 mt-8">
-        <p>ZingSpeed Mobile Esports Group Drawer &copy; 2026. Built with HTML, Tailwind CSS & JS.</p>
-    </footer>
 
-    <script>
-        // State variables
-        let currentMode = 'auto'; // 'auto' | 'manual'
-        let tournamentData = []; // Array of Group objects: { name: 'Bảng A', players: [{ name, rank, points }] }
-        let qualifyCount = 2;
+    <div class="flex justify-between items-center mt-2">
 
-        // Initialize App on DOM Loaded
-        window.addEventListener('DOMContentLoaded', () => {
-            loadFromLocalStorage();
-            if (tournamentData.length === 0) {
-                triggerRandomDraw();
-            } else {
-                renderGroups();
-            }
-        });
+     <span class="text-xs font-bold
+     ${eliminated?"text-red-400":"text-cyan-400"}">
 
-        // Switch Input Mode UI
-        function switchInputMode(mode) {
-            currentMode = mode;
-            const autoBtn = document.getElementById('modeAutoBtn');
-            const manualBtn = document.getElementById('modeManualBtn');
-            const autoSection = document.getElementById('autoInputSection');
-            const manualSection = document.getElementById('manualInputSection');
+      ${Number(player.points)||0} POINT
 
-            if (mode === 'auto') {
-                autoBtn.className = "py-2 rounded-lg text-sm font-bold transition-all bg-purple-600 text-white shadow-md";
-                manualBtn.className = "py-2 rounded-lg text-sm font-bold text-gray-400 hover:text-white transition-all";
-                autoSection.classList.remove('hidden');
-                manualSection.classList.add('hidden');
-            } else {
-                manualBtn.className = "py-2 rounded-lg text-sm font-bold transition-all bg-purple-600 text-white shadow-md";
-                autoBtn.className = "py-2 rounded-lg text-sm font-bold text-gray-400 hover:text-white transition-all";
-                manualSection.classList.remove('hidden');
-                autoSection.classList.add('hidden');
-            }
-        }
+     </span>
 
-        // Parse player input based on current mode
-        function getPlayerList() {
-            if (currentMode === 'auto') {
-                const count = parseInt(document.getElementById('playerCountInput').value) || 16;
-                const players = [];
-                for (let i = 1; i <= count; i++) {
-                    players.push(`Tuyển thủ ${i}`);
-                }
-                return players;
-            } else {
-                const rawText = document.getElementById('playerListInput').value;
-                if (!rawText.trim()) return [];
-                
-                // Split by line or comma
-                return rawText
-                    .split(/[\n,]+/)
-                    .map(name => name.trim())
-                    .filter(name => name.length > 0);
-            }
-        }
+     ${badge}
 
-        // Main Shuffle & Draw Function with animation
-        function triggerRandomDraw() {
-            const players = getPlayerList();
-            const groupCount = parseInt(document.getElementById('groupCountInput').value) || 4;
-            qualifyCount = parseInt(document.getElementById('qualifyCountInput').value) || 2;
+    </div>
 
-            if (players.length < groupCount) {
-                showToast("Số lượng người chơi phải lớn hơn hoặc bằng số bảng đấu!", "error");
-                return;
-            }
+   </div>
 
-            const drawBtn = document.getElementById('drawBtn');
-            const grid = document.getElementById('groupsGrid');
+   `;
 
-            // Button Loading State
-            drawBtn.disabled = true;
-            drawBtn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> ĐANG XÁO TRỘN...`;
-            grid.classList.add('shuffling');
+  });
 
-            setTimeout(() => {
-                // Fisher-Yates Random Shuffle
-                const shuffled = [...players];
-                for (let i = shuffled.length - 1; i > 0; i--) {
-                    const j = Math.floor(Math.random() * (i + 1));
-                    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-                }
 
-                // Construct Groups
-                tournamentData = [];
-                for (let g = 0; g < groupCount; g++) {
-                    const groupLetter = String.fromCharCode(65 + g); // A, B, C...
-                    tournamentData.push({
-                        name: `Bảng ${groupLetter}`,
-                        players: []
-                    });
-                }
+  html+=`
 
-                // Distribute players evenly
-                shuffled.forEach((playerName, index) => {
-                    const targetGroupIndex = index % groupCount;
-                    tournamentData[targetGroupIndex].players.push({
-                        name: playerName,
-                        rank: null,
-                        points: 0
-                    });
-                });
+  </div>
 
-                // Render UI
-                renderGroups();
-                saveToLocalStorage();
+  <div class="px-4 py-3 border-t border-gray-800
+  bg-black/30 flex justify-between text-xs">
 
-                // Reset Animation & Button
-                grid.classList.remove('shuffling');
-                drawBtn.disabled = false;
-                drawBtn.innerHTML = `<i class="fa-solid fa-shuffle"></i> CHIA BẢNG NGẪU NHIÊN`;
+   <span class="text-gray-500">
+    Top ${allowed} đi tiếp
+   </span>
 
-                showToast("Đã chia bảng thành công!", "success");
-            }, 400);
-        }
+   <span class="text-red-400">
+    Người còn lại = Bị loại
+   </span>
 
-        // Render Group Cards
-        function renderGroups() {
-            const grid = document.getElementById('groupsGrid');
-            grid.innerHTML = '';
+  </div>
 
-            let totalPlayersCount = 0;
+  `;
 
-            tournamentData.forEach((group, gIndex) => {
-                totalPlayersCount += group.players.length;
 
-                const card = document.createElement('div');
-                card.className = "glass-panel rounded-2xl overflow-hidden border border-gray-800 flex flex-col justify-between hover:border-purple-500/40 transition-all";
+  card.innerHTML=html;
 
-                let rowsHtml = '';
-                group.players.forEach((player, pIndex) => {
-                    const isQualified = pIndex < qualifyCount;
-                    const badgeClass = isQualified 
-                        ? "bg-yellow-500/20 text-yellow-400 border-yellow-500/50" 
-                        : "bg-gray-800/60 text-gray-400 border-gray-700";
+  container.appendChild(card);
 
-                    const qualLabel = isQualified ? `<span class="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-yellow-500/20 text-yellow-400 border border-yellow-500/30">TOP ${pIndex + 1} - ĐI TIẾP</span>` : '';
+ });
 
-                    rowsHtml += `
-                        <div class="flex items-center justify-between p-2.5 rounded-xl ${isQualified ? 'bg-yellow-500/5 border border-yellow-500/20' : 'bg-black/30 border border-gray-800/60'} transition-all hover:bg-white/5">
-                            <div class="flex items-center space-x-3">
-                                <span class="w-6 h-6 rounded-lg text-xs font-bold flex items-center justify-center border ${badgeClass}">
-                                    ${pIndex + 1}
-                                </span>
-                                <span class="font-bold text-sm ${isQualified ? 'text-white glow-text-gold' : 'text-gray-300'}">
-                                    ${player.name}
-                                </span>
-                            </div>
-                            <div class="flex items-center space-x-2">
-                                ${player.rank ? `<span class="text-xs font-mono font-bold text-cyan-400">${player.points} pts</span>` : ''}
-                                ${qualLabel}
-                            </div>
-                        </div>
-                    `;
-                });
 
-                card.innerHTML = `
-                    <div class="p-4 border-b border-gray-800 bg-gradient-to-r from-purple-900/30 to-black/40 flex justify-between items-center">
-                        <div class="flex items-center space-x-2">
-                            <i class="fa-solid fa-trophy text-purple-400"></i>
-                            <h3 class="orbitron font-black text-lg text-white">${group.name}</h3>
-                        </div>
-                        <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-purple-500/10 text-purple-300 border border-purple-500/30">
-                            ${group.players.length} Tuyển thủ
-                        </span>
-                    </div>
+ document.getElementById("totalPlayers").textContent=
+ totalPlayers;
 
-                    <div class="p-4 space-y-2 flex-grow">
-                        ${rowsHtml}
-                    </div>
+ document.getElementById("totalGroups").textContent=
+ groups.length;
 
-                    <div class="px-4 py-2 bg-black/40 border-t border-gray-800/80 text-[11px] text-gray-500 flex justify-between">
-                        <span>Đủ điều kiện: Top 1 - ${qualifyCount}</span>
-                        <span>ZingSpeed Mobile Format</span>
-                    </div>
-                `;
+ document.getElementById("totalQualified").textContent=
+ totalQualified;
 
-                grid.appendChild(card);
-            });
 
-            // Update stats
-            document.getElementById('statTotalPlayers').innerText = totalPlayersCount;
-            document.getElementById('statTotalGroups').innerText = tournamentData.length;
-            document.getElementById('statTotalQualifiers').innerText = tournamentData.length * qualifyCount;
-        }
+ /* SCORE EVENTS */
 
-        // ZingSpeed Race Simulator (Optional Fun Feature)
-        function simulateRaceMode() {
-            if (tournamentData.length === 0) return;
+ document.querySelectorAll(".score").forEach(input=>{
 
-            // ZingSpeed Mobile Standard Scoring system for 6-player races: 1st: 10pts, 2nd: 8pts, 3rd: 6pts, 4th: 4pts, 5th: 2pts, 6th: 0pt
-            const pointTable = [10, 8, 6, 4, 2, 0, 0, 0];
+  input.addEventListener("input",function(){
 
-            tournamentData.forEach(group => {
-                // Shuffle players for simulated race result
-                const simShuffled = [...group.players];
-                for (let i = simShuffled.length - 1; i > 0; i--) {
-                    const j = Math.floor(Math.random() * (i + 1));
-                    [simShuffled[i], simShuffled[j]] = [simShuffled[j], simShuffled[i]];
-                }
+   const g=parseInt(this.dataset.group);
+   const p=parseInt(this.dataset.player);
 
-                // Assign ranks and points
-                simShuffled.forEach((p, idx) => {
-                    p.rank = idx + 1;
-                    p.points = pointTable[idx] !== undefined ? pointTable[idx] : 0;
-                });
+   let value=parseInt(this.value);
 
-                // Sort group players by points descending
-                group.players = simShuffled.sort((a, b) => b.points - a.points);
-            });
+   if(!Number.isFinite(value)||value<0){
+    value=0;
+   }
 
-            renderGroups();
-            saveToLocalStorage();
-            showToast("Đã mô phỏng kết quả trận đua ZingSpeed!", "success");
-        }
+   value=Math.min(value,9999);
 
-        // Copy as Markdown for GitHub / Discord
-        function copyAsMarkdown() {
-            if (tournamentData.length === 0) return;
+   groups[g].players[p].points=value;
 
-            let md = `### 🏎️ ZINGSPEED MOBILE - KẾT QUẢ CHIA BẢNG THI ĐẤU\n\n`;
+   /*
+    Nếu thay điểm sau khi đã xếp hạng,
+    kết quả cũ sẽ được reset.
+   */
 
-            tournamentData.forEach(group => {
-                md += `#### 📌 ${group.name}\n`;
-                md += `| STT | Tên Ingame | Trạng Thái |\n`;
-                md += `| :---: | :--- | :---: |\n`;
-                
-                group.players.forEach((player, idx) => {
-                    const status = idx < qualifyCount ? `**TOP ${idx + 1} (Đi tiếp)**` : 'Vòng bảng';
-                    md += `| ${idx + 1} | ${player.name} | ${status} |\n`;
-                });
-                md += `\n`;
-            });
+   groups[g].players[p].status=null;
+   groups[g].players[p].rank=null;
 
-            copyToClipboard(md);
-            showToast("Đã sao chép định dạng Markdown!", "success");
-        }
+  });
 
-        // Copy as Plain Text for Messenger/Zalo
-        function copyAsText() {
-            if (tournamentData.length === 0) return;
+ });
 
-            let text = `🏆 ZINGSPEED MOBILE - BẢNG THI ĐẤU 🏆\n==============================\n\n`;
+}
 
-            tournamentData.forEach(group => {
-                text += `📌 ${group.name} (${group.players.length} người):\n`;
-                group.players.forEach((player, idx) => {
-                    const qualTag = idx < qualifyCount ? ` -> [TOP ${idx + 1} VÀO VÒNG TRONG]` : '';
-                    text += `  ${idx + 1}. ${player.name}${qualTag}\n`;
-                });
-                text += `\n`;
-            });
 
-            copyToClipboard(text);
-            showToast("Đã sao chép danh sách dạng Văn Bản!", "success");
-        }
+/* =========================
+   CALCULATE RESULTS
+========================= */
 
-        // Clipboard Helper
-        function copyToClipboard(text) {
-            const textarea = document.createElement('textarea');
-            textarea.value = text;
-            document.body.appendChild(textarea);
-            textarea.select();
-            document.execCommand('copy');
-            document.body.removeChild(textarea);
-        }
+function calculateResults(){
 
-        // Local Storage Persistence
-        function saveToLocalStorage() {
-            const state = {
-                currentMode,
-                qualifyCount,
-                tournamentData,
-                playerCount: document.getElementById('playerCountInput').value,
-                groupCount: document.getElementById('groupCountInput').value,
-                playerListText: document.getElementById('playerListInput').value
-            };
-            localStorage.setItem('zsm_tournament_state', JSON.stringify(state));
-        }
+ if(groups.length===0){
 
-        function loadFromLocalStorage() {
-            const saved = localStorage.getItem('zsm_tournament_state');
-            if (saved) {
-                try {
-                    const state = JSON.parse(saved);
-                    currentMode = state.currentMode || 'auto';
-                    qualifyCount = state.qualifyCount || 2;
-                    tournamentData = state.tournamentData || [];
+  toast("Chưa có bảng đấu!","error");
+  return;
+ }
 
-                    if (state.playerCount) document.getElementById('playerCountInput').value = state.playerCount;
-                    if (state.groupCount) document.getElementById('groupCountInput').value = state.groupCount;
-                    if (state.playerListText) document.getElementById('playerListInput').value = state.playerListText;
-                    document.getElementById('qualifyCountInput').value = qualifyCount;
 
-                    switchInputMode(currentMode);
-                } catch(e) {
-                    console.error("Lỗi load LocalStorage", e);
-                }
-            }
-        }
+ /* Lấy điểm từ các ô input */
 
-        function resetAllData() {
-            localStorage.removeItem('zsm_tournament_state');
-            document.getElementById('playerCountInput').value = 16;
-            document.getElementById('groupCountInput').value = 4;
-            document.getElementById('qualifyCountInput').value = 2;
-            document.getElementById('playerListInput').value = '';
-            switchInputMode('auto');
-            triggerRandomDraw();
-            showToast("Đã khôi phục cài đặt mặc định!", "success");
-        }
+ document.querySelectorAll(".score").forEach(input=>{
 
-        // Toast Notification System
-        function showToast(msg, type = 'success') {
-            const toast = document.getElementById('toast');
-            const toastMsg = document.getElementById('toastMsg');
-            const toastIcon = document.getElementById('toastIcon');
+  const g=parseInt(input.dataset.group);
+  const p=parseInt(input.dataset.player);
 
-            toastMsg.innerText = msg;
-            if (type === 'error') {
-                toastIcon.className = "fa-solid fa-triangle-exclamation text-red-400 text-lg";
-            } else {
-                toastIcon.className = "fa-solid fa-circle-check text-cyan-400 text-lg";
-            }
+  let value=parseInt(input.value);
 
-            toast.classList.remove('translate-y-20', 'opacity-0');
-            toast.classList.add('translate-y-0', 'opacity-100');
+  if(!Number.isFinite(value)||value<0){
+   value=0;
+  }
 
-            setTimeout(() => {
-                toast.classList.add('translate-y-20', 'opacity-0');
-                toast.classList.remove('translate-y-0', 'opacity-100');
-            }, 2500);
-        }
-    </script>
+  groups[g].players[p].points=
+  Math.min(value,9999);
+
+ });
+
+
+ let qualify=parseInt(
+  document.getElementById("qualifyCount").value
+ )||3;
+
+
+ groups.forEach(group=>{
+
+  const limit=Math.min(
+   Math.max(1,qualify),
+   group.players.length
+  );
+
+
+  /*
+   Xếp điểm từ CAO xuống THẤP.
+  */
+
+  group.players.sort((a,b)=>{
+
+   return (Number(b.points)||0)-
+          (Number(a.points)||0);
+
+  });
+
+
+  /*
+   Gán hạng + trạng thái.
+  */
+
+  group.players.forEach((player,index)=>{
+
+   player.rank=index+1;
+
+   if(index<limit){
+
+    player.status="qualified";
+
+   }else{
+
+    player.status="eliminated";
+
+   }
+
+  });
+
+ });
+
+
+ render();
+
+ toast(
+  "Đã tính điểm! Người thấp điểm đã được đánh dấu BỊ LOẠI."
+ );
+
+}
+
+
+/* =========================
+   SIMULATION
+========================= */
+
+function simulate(){
+
+ if(groups.length===0){
+
+  toast("Chưa có bảng đấu!","error");
+  return;
+ }
+
+
+ const pointTable=[
+  10,8,6,4,2,1,0,0
+ ];
+
+
+ groups.forEach(group=>{
+
+  group.players=shuffle(group.players);
+
+
+  group.players.forEach((player,index)=>{
+
+   player.points=
+   pointTable[index]!==undefined
+   ?pointTable[index]
+   :0;
+
+  });
+
+
+  group.players.sort(
+   (a,b)=>b.points-a.points
+  );
+
+
+  const qualify=Math.min(
+   parseInt(document.getElementById("qualifyCount").value)||3,
+   group.players.length
+  );
+
+
+  group.players.forEach((player,index)=>{
+
+   player.rank=index+1;
+
+   player.status=
+   index<qualify
+   ?"qualified"
+   :"eliminated";
+
+  });
+
+ });
+
+
+ render();
+
+ toast("Đã mô phỏng kết quả cuộc đua!");
+
+}
+
+
+/* =========================
+   COPY TEXT
+========================= */
+
+function copyResult(){
+
+ if(groups.length===0){
+
+  toast("Chưa có kết quả!","error");
+  return;
+ }
+
+ let text=
+ "🏎️ ZINGSPEED MOBILE\n"+
+ "KẾT QUẢ BẢNG ĐẤU\n"+
+ "====================\n\n";
+
+
+ groups.forEach(group=>{
+
+  text+=`📌 ${group.name}\n`;
+
+  group.players.forEach((p,index)=>{
+
+   const status=
+   p.status==="qualified"
+   ?"🟡 ĐI TIẾP"
+   :"🔴 BỊ LOẠI";
+
+   text+=
+   `${index+1}. ${p.name} - ${p.points} điểm - ${status}\n`;
+
+  });
+
+  text+="\n";
+
+ });
+
+
+ navigator.clipboard?.writeText(text);
+
+ toast("Đã copy kết quả!");
+
+}
+
+
+/* =========================
+   RESET
+========================= */
+
+function resetAll(){
+
+ groups=[];
+
+ document.getElementById("playerCount").value=16;
+ document.getElementById("groupCount").value=4;
+ document.getElementById("qualifyCount").value=3;
+ document.getElementById("playerList").value="";
+
+ setMode("auto");
+
+ render();
+
+ toast("Đã đặt lại!");
+
+}
+
+
+/* =========================
+   ESCAPE HTML
+========================= */
+
+function escapeHtml(value){
+
+ return String(value)
+ .replace(/&/g,"&amp;")
+ .replace(/</g,"&lt;")
+ .replace(/>/g,"&gt;")
+ .replace(/"/g,"&quot;")
+ .replace(/'/g,"&#039;");
+
+}
+
+
+/* =========================
+   TOAST
+========================= */
+
+function toast(message,type="success"){
+
+ const box=document.getElementById("toast");
+ const text=document.getElementById("toastText");
+ const icon=document.getElementById("toastIcon");
+
+ text.textContent=message;
+
+ if(type==="error"){
+
+  icon.className=
+  "fa-solid fa-triangle-exclamation text-red-400";
+
+ }else{
+
+  icon.className=
+  "fa-solid fa-circle-check text-cyan-400";
+
+ }
+
+ box.classList.remove(
+  "translate-y-20",
+  "opacity-0"
+ );
+
+ box.classList.add(
+  "translate-y-0",
+  "opacity-100"
+ );
+
+
+ setTimeout(()=>{
+
+  box.classList.add(
+   "translate-y-20",
+   "opacity-0"
+  );
+
+  box.classList.remove(
+   "translate-y-0",
+   "opacity-100"
+  );
+
+ },2500);
+
+}
+
+
+/* =========================
+   START
+========================= */
+
+setMode("auto");
+render();
+
+</script>
+
 </body>
 </html>
