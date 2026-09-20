@@ -96,6 +96,56 @@
         .inventory-select:focus { border-color: #06b6d4; }
         .matches-details > summary::-webkit-details-marker { display:none; }
         details > summary { list-style:none; }
+
+        /* ===== Pastel Esports Theme ===== */
+        body {
+            background-color: #171923 !important;
+            background-image:
+                radial-gradient(circle at 12% 15%, rgba(255,154,162,.16) 0%, transparent 34%),
+                radial-gradient(circle at 88% 25%, rgba(181,234,215,.13) 0%, transparent 32%),
+                radial-gradient(circle at 75% 90%, rgba(199,206,234,.14) 0%, transparent 36%);
+            color: #f8f7fb;
+        }
+        .glass-panel {
+            background: rgba(36, 40, 58, .84) !important;
+            border-color: rgba(255,255,255,.10) !important;
+        }
+        .bg-purple-600, .bg-purple-500 { background-color: #FF9AA2 !important; }
+        .bg-cyan-500, .bg-cyan-400 { background-color: #B5EAD7 !important; }
+        .bg-yellow-500 { background-color: #FFD1AC !important; }
+        .bg-red-500 { background-color: #FF9AA2 !important; }
+        .bg-purple-900 { background-color: rgba(255,154,162,.24) !important; }
+        .bg-cyan-900 { background-color: rgba(181,234,215,.20) !important; }
+        .bg-red-900 { background-color: rgba(255,154,162,.20) !important; }
+        .text-purple-400, .text-purple-300 { color: #FFB7B2 !important; }
+        .text-cyan-400, .text-cyan-300 { color: #B5EAD7 !important; }
+        .text-yellow-500, .text-yellow-400, .text-yellow-300 { color: #FFD1AC !important; }
+        .text-red-400, .text-red-300 { color: #FF9AA2 !important; }
+        .border-purple-500, .border-purple-400 { border-color: #FF9AA2 !important; }
+        .border-cyan-500, .border-cyan-400 { border-color: #B5EAD7 !important; }
+        .border-yellow-500, .border-yellow-400 { border-color: #FFD1AC !important; }
+        .border-red-500 { border-color: #FF9AA2 !important; }
+        .hover\:text-red-400:hover { color: #FF9AA2 !important; }
+        .hover\:text-white:hover { color: #ffffff !important; }
+        .focus\:border-cyan-400:focus { border-color: #B5EAD7 !important; }
+        .shadow-neon-purple { box-shadow: 0 0 20px rgba(255,154,162,.30) !important; }
+        .shadow-neon-cyan { box-shadow: 0 0 20px rgba(181,234,215,.26) !important; }
+        .shadow-neon-gold { box-shadow: 0 0 15px rgba(255,209,172,.30) !important; }
+        .glow-text-purple { text-shadow: 0 0 10px rgba(255,154,162,.55) !important; }
+        .glow-text-cyan { text-shadow: 0 0 10px rgba(181,234,215,.55) !important; }
+        .inventory-select:focus { border-color: #B5EAD7 !important; box-shadow: 0 0 0 2px rgba(181,234,215,.12); }
+        .inventory-thumb, .map-thumb { border-color: rgba(255,183,178,.38); background: rgba(23,25,35,.55); }
+        ::-webkit-scrollbar-track { background: #171923; }
+        ::-webkit-scrollbar-thumb { background: #4b5068; }
+        ::-webkit-scrollbar-thumb:hover { background: #FF9AA2; }
+
+        /* Header / logo gradients using the supplied pastel palette */
+        .bg-gradient-to-tr.from-purple-600.to-cyan-500 {
+            background-image: linear-gradient(135deg, #FF9AA2, #B5EAD7) !important;
+        }
+        .bg-gradient-to-r.from-purple-400.via-cyan-400.to-pink-500 {
+            background-image: linear-gradient(90deg, #FF9AA2, #B5EAD7, #C7CEEA) !important;
+        }
 </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between selection:bg-purple-500 selection:text-white">
