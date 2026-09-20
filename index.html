@@ -867,9 +867,9 @@
         }
 
         function getResultsUrl() {
-            const base = new URL('results.html', window.location.href);
-            base.hash = 'data=' + encodeURIComponent(JSON.stringify(getResultsPayload()));
-            return base.toString();
+            // Public result page reads the latest shared tournament state from localStorage.
+            // Do not put a snapshot in the hash so an already-open result page can keep updating.
+            return new URL('results.html', window.location.href).toString();
         }
 
         function openResultsPage() {
