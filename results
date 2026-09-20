@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RESULT — Trang Tổng Kết Thi Đấu</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+  body{margin:0;background:linear-gradient(135deg,#eef7ff,#f9fbff 48%,#eef7ff);color:#182033;font-family:Arial,Helvetica,sans-serif;min-height:100vh}
+  .topline{height:7px;background:linear-gradient(90deg,#00a8e8,#22c55e,#facc15,#00a8e8)}
+  .paper{background:rgba(255,255,255,.94);box-shadow:0 15px 50px rgba(39,74,111,.12);border:1px solid #dce8f3}
+  .round-head{background:linear-gradient(#0aa8e8,#0495d0);color:white}
+  .round-tab{background:#eaf5fb;color:#3d5870;border:1px solid #d5e8f3}
+  .round-tab.active{background:#08a6df;color:white;border-color:#08a6df;box-shadow:inset 0 -3px 0 rgba(0,0,0,.12)}
+  .score-cell{min-width:86px;border-left:1px solid #dbe8f0}
+  .score-win{font-weight:800;color:#0a7f5a}
+  .score-zero{color:#9aa8b5}
+  .rank-1{background:linear-gradient(90deg,#fff7d6,#fffdf2)}
+  .rank-2{background:#f8fbfd}.rank-3{background:#fbfcfd}
+  .qualified{color:#14855e;font-weight:800}.eliminated{color:#a65a5a}
+  .tiny{font-size:11px}.mono{font-variant-numeric:tabular-nums}
+  @media(max-width:700px){.score-cell{min-width:66px}.player-col{min-width:150px}.round-tab{font-size:11px;padding:8px 10px}}
+</style>
+</head>
+<body>
+<div class="topline"></div>
+<header class="paper border-x-0 border-t-0 rounded-b-2xl mx-auto max-w-7xl px-4 sm:px-8 py-4">
+  <div class="flex flex-wrap items-center justify-between gap-4">
+    <div>
+      <div class="text-[10px] tracking-[.45em] font-black text-slate-400">ZINGSPEED MOBILE</div>
+      <h1 class="text-3xl sm:text-5xl font-black tracking-tight text-slate-800">RESULT<span class="text-sky-500">.</span></h1>
+      <div class="text-xs sm:text-sm tracking-[.35em] text-slate-400 font-bold">ASIAN CUP · KẾT QUẢ THI ĐẤU</div>
+    </div>
+    <div class="text-right">
+      <div id="updated" class="tiny text-slate-400">Đang tải dữ liệu...</div>
+      <button onclick="reloadData()" class="mt-2 px-3 py-2 rounded-lg bg-slate-800 text-white text-xs font-bold hover:bg-slate-700"><i class="fa-solid fa-rotate"></i> CẬP NHẬT</button>
+    </div>
+  </div>
+</header>
+
+<main class="max-w-7xl mx-auto px-3 sm:px-6 py-5">
+  <section class="paper rounded-2xl overflow-hidden">
+    <div class="px-4 py-4 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3">
+      <div><h2 class="font-black text-xl text-slate-800">BẢNG TỔNG KẾT</h2><p class="tiny text-slate-400">Kết quả từng vòng · tổng điểm · thứ hạng</p></div>
+      <div id="groupTabs" class="flex flex-wrap gap-2"></div>
+    </div>
+    <div id="roundTabs" class="flex gap-2 overflow-x-auto p-3 bg-slate-50 border-b border-slate-200"></div>
+    <div class="overflow-x-auto">
+      <table class="w-full border-collapse">
+        <thead id="tableHead"></thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="mt-5 grid grid-cols-1 lg:grid-cols-3 gap-5">
+    <div class="paper rounded-2xl p-5 lg:col-span-2">
+      <div class="flex items-center justify-between mb-3"><h3 class="font-black text-lg">🏆 XẾP HẠNG</h3><span id="qualifyText" class="tiny text-slate-400"></span></div>
+      <div id="ranking" class="space-y-2"></div>
+    </div>
+    <div class="paper rounded-2xl p-5">
+      <h3 class="font-black text-lg mb-3">THÔNG TIN</h3>
+      <div class="space-y-2 tiny text-slate-500">
+        <div class="flex justify-between"><span>Số tuyển thủ</span><b id="statPlayers" class="text-slate-800">0</b></div>
+        <div class="flex justify-between"><span>Số vòng</span><b id="statRounds" class="text-slate-800">0</b></div>
+        <div class="flex justify-between"><span>Top đi tiếp</span><b id="statQualify" class="text-slate-800">0</b></div>
+      </div>
+      <div class="mt-5 rounded-xl bg-sky-50 border border-sky-100 p-3 text-xs text-sky-800">Trang này chỉ để <b>theo dõi</b>. Không có ô nhập điểm hay chỉnh sửa kết quả.</div>
+    </div>
+  </section>
+</main>
+
+<script>
+let state={tournamentData:[],qualifyCount:3,updatedAt:null};
+let activeGroup=0, activeRound=-1;
+const SHEET_ID='1_zrKpwAp0s8hMv8LZK208Qc-0SGE6npj_offF3ej5cw';
+const SHEET_GVIZ=`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=`;
+let inventory={maps:[]};
+function esc(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));}
+function decodeHash(){
+  const raw=location.hash.startsWith('#data=')?location.hash.slice(6):'';
+  if(!raw)return null;
+  try{return JSON.parse(decodeURIComponent(raw));}catch(e){return null;}
+}
+function loadData(){
+  const fromHash=decodeHash();
+  if(fromHash&&Array.isArray(fromHash.tournamentData)) state=fromHash;
+  else {try{const saved=JSON.parse(localStorage.getItem('zsm_tournament_state')||'null'); if(saved&&Array.isArray(saved.tournamentData)) state={...saved};}catch(e){}}
+  if(!Array.isArray(state.tournamentData))state.tournamentData=[];
+  state.tournamentData.forEach(g=>{g.players=g.players||[];g.matches=g.matches||[];g.matches.forEach(m=>m.scores=m.scores||[]);});
+  render();
+}
+function parseCSV(text){const rows=[];let row=[],cell='',q=false;for(let i=0;i<text.length;i++){let c=text[i],n=text[i+1];if(c==='"'){if(q&&n==='"'){cell+='"';i++;}else q=!q;}else if(c===','&&!q){row.push(cell.trim());cell='';}else if((c==='\n'||c==='\r')&&!q){if(c==='\r'&&n==='\n')i++;row.push(cell.trim());cell='';if(row.some(x=>x!==''))rows.push(row);row=[];}else cell+=c;}row.push(cell.trim());if(row.some(x=>x!==''))rows.push(row);return rows;}
+async function loadMaps(){try{const r=await fetch(SHEET_GVIZ+encodeURIComponent('MAP'),{cache:'no-store'});if(!r.ok)return;const rows=parseCSV(await r.text());if(!rows.length)return;const h=rows[0].map(x=>x.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/đ/g,'d'));inventory.maps=rows.slice(1).map(r=>{const o={};h.forEach((x,i)=>o[x]=(r[i]||'').trim());return {name:o['ten map']||o['map']||o['ten']||'',image:o['anh map']||o['image map']||o['anh']||o['image']||''};}).filter(x=>x.name);}catch(e){}}
+function render(){
+ const groups=state.tournamentData;
+ document.getElementById('updated').textContent=state.updatedAt?`Cập nhật: ${new Date(state.updatedAt).toLocaleString('vi-VN')}`:'Dữ liệu hiện tại';
+ const tabs=document.getElementById('groupTabs');tabs.innerHTML=groups.map((g,i)=>`<button onclick="selectGroup(${i})" class="px-3 py-2 rounded-lg text-xs font-black ${i===activeGroup?'bg-sky-500 text-white':'bg-slate-100 text-slate-600'}">${esc(g.name||'Bảng '+String.fromCharCode(65+i))}</button>`).join('');
+ const g=groups[activeGroup]||{players:[],matches:[]};
+ if(activeRound>=g.matches.length)activeRound=-1;
+ const rounds=document.getElementById('roundTabs');rounds.innerHTML=`<button onclick="selectRound(-1)" class="round-tab ${activeRound===-1?'active':''} rounded-lg px-4 py-2 text-xs font-black whitespace-nowrap">TẤT CẢ VÒNG</button>`+g.matches.map((m,i)=>{const map=Number.isInteger(m.mapIndex)?inventory.maps[m.mapIndex]:null;return `<button onclick="selectRound(${i})" class="round-tab ${activeRound===i?'active':''} rounded-lg px-4 py-2 text-xs font-black whitespace-nowrap">ROUND ${i+1}${map?' · '+esc(map.name):''}</button>`}).join('');
+ renderTable(g); renderRanking(g);
+ document.getElementById('statPlayers').textContent=g.players.length;document.getElementById('statRounds').textContent=g.matches.length;document.getElementById('statQualify').textContent=Math.min(state.qualifyCount||0,g.players.length);
+}
+function scoreFor(g,p,r){return Number(g.matches[r]?.scores?.[p])||0;}
+function total(g,p){return g.matches.reduce((s,m)=>s+(Number(m.scores?.[p])||0),0);}
+function sortedPlayers(g){return g.players.map((p,i)=>({...p,_i:i,_total:total(g,i)})).sort((a,b)=>(Number(a.rank)||999)-(Number(b.rank)||999)||b._total-a._total);}
+function renderTable(g){
+ const rounds=activeRound===-1?g.matches.map((_,i)=>i):[activeRound];
+ document.getElementById('tableHead').innerHTML=`<tr class="round-head"><th class="text-left px-3 py-3 sticky left-0 bg-[#08a6df] z-10">Tuyển thủ</th>${rounds.map(i=>`<th class="px-3 py-3 text-center whitespace-nowrap">ROUND ${i+1}</th>`).join('')}<th class="px-4 py-3 text-center">TỔNG</th><th class="px-4 py-3 text-center">HẠNG</th></tr>`;
+ const players=sortedPlayers(g);
+ document.getElementById('tableBody').innerHTML=players.map((p,idx)=>{const rank=Number(p.rank)||idx+1;const cls=rank===1?'rank-1':rank===2?'rank-2':rank===3?'rank-3':'';return `<tr class="border-b border-slate-100 ${cls}"><td class="player-col sticky left-0 bg-white/95 px-3 py-3 z-10"><div class="flex items-center gap-2"><span class="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center font-black text-xs">${rank}</span><div><div class="font-black text-sm text-slate-800">${esc(p.name)}</div><div class="tiny ${p.result==='qualified'?'qualified':'eliminated'}">${p.result==='qualified'?'ĐI TIẾP':p.result==='eliminated'?'BỊ LOẠI':'—'}</div></div></div></td>${rounds.map(r=>{const v=scoreFor(g,p._i,r);return `<td class="score-cell px-3 py-3 text-center mono ${v?'score-win':'score-zero'}">${v}</td>`}).join('')}<td class="px-4 py-3 text-center font-black text-sky-700 mono">${p._total}</td><td class="px-4 py-3 text-center font-black">#${rank}</td></tr>`}).join('');
+}
+function renderRanking(g){const players=sortedPlayers(g);document.getElementById('qualifyText').textContent=`Top ${Math.min(state.qualifyCount||0,g.players.length)} đi tiếp`;document.getElementById('ranking').innerHTML=players.map((p,i)=>`<div class="flex items-center gap-3 rounded-xl border border-slate-100 px-3 py-2 ${i<state.qualifyCount?'bg-emerald-50/60':'bg-white'}"><div class="w-8 text-center font-black">${Number(p.rank)||i+1}</div><div class="flex-1 font-bold text-sm">${esc(p.name)}</div><div class="text-right"><div class="font-black text-sky-600 mono">${p._total}</div><div class="tiny text-slate-400">điểm</div></div></div>`).join('');}
+function selectGroup(i){activeGroup=i;activeRound=-1;render();}
+function selectRound(i){activeRound=i;render();}
+function reloadData(){loadData();loadMaps();}
+window.addEventListener('storage',()=>{if(!location.hash)loadData();});
+window.addEventListener('hashchange',loadData);
+loadData();loadMaps();
+setInterval(()=>{if(!location.hash){try{const saved=JSON.parse(localStorage.getItem('zsm_tournament_state')||'null');if(saved&&JSON.stringify(saved.tournamentData)!==JSON.stringify(state.tournamentData)){state={...saved};render();}}catch(e){}}},2000);
+</script>
+</body>
+</html>
