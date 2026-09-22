@@ -579,7 +579,7 @@
                             scores[index] = 0;
                         } else {
                             // +0.01..0.99 = 10; +1.00..1.99 = 9; ... +9.00..9.99 = 1.
-                            scores[index] = 11 - Math.ceil(delay);
+                            scores[index] = 10 - Math.floor(delay);
                         }
                     });
                 }
