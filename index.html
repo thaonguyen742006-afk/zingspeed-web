@@ -549,11 +549,18 @@
                 if (finished.length) {
                     const best = Math.min(...finished.map(x => x.time));
                     finished.forEach(({ index, time }) => {
-                        const delay = Math.max(0, time - best);
-                        if (delay <= 0) {
+                        // Làm tròn độ trễ đến 0.01s để tránh sai số floating-point.
+                        const delay = Math.max(0, Math.round((time - best) * 100) / 100);
+
+                        if (delay === 0) {
+                            // Về nhất (hoặc đồng thời bằng thời gian tốt nhất).
                             scores[index] = 11;
+                        } else if (delay >= 10) {
+                            // Từ +10.00s trở lên = 0 điểm.
+                            scores[index] = 0;
                         } else {
-                            scores[index] = Math.max(0, 10 - Math.floor(delay));
+                            // +0.01..0.99 = 10; +1.00..1.99 = 9; ... +9.00..9.99 = 1.
+                            scores[index] = 11 - Math.ceil(delay);
                         }
                     });
                 }
