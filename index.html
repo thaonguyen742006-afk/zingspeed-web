@@ -177,18 +177,6 @@
         .glow-text-purple { text-shadow: 0 0 10px rgba(255,154,162,.55) !important; }
         .glow-text-cyan { text-shadow: 0 0 10px rgba(181,234,215,.55) !important; }
         .inventory-select:focus { border-color: #B5EAD7 !important; box-shadow: 0 0 0 2px rgba(181,234,215,.12); }
-        .group-name-input {
-            width: min(260px, 100%);
-            background: rgba(0,0,0,.35);
-            border: 1px solid rgba(255,255,255,.12);
-            border-radius: 8px;
-            color: #fff;
-            padding: 7px 10px;
-            font-size: 13px;
-            font-weight: 800;
-            outline: none;
-        }
-        .group-name-input:focus { border-color: #B5EAD7; box-shadow: 0 0 0 2px rgba(181,234,215,.10); }
         .inventory-thumb, .map-thumb { border-color: rgba(255,183,178,.38); background: rgba(23,25,35,.55); }
         ::-webkit-scrollbar-track { background: #171923; }
         ::-webkit-scrollbar-thumb { background: #4b5068; }
@@ -202,10 +190,8 @@
             background-image: linear-gradient(90deg, #FF9AA2, #B5EAD7, #C7CEEA) !important;
         }
 
-.time-input{width:120px;background:rgba(0,0,0,.6);border:1px solid rgba(34,211,238,.22);border-radius:8px;padding:7px 9px;text-align:center;color:#67e8f9;font-weight:900;font-family:Orbitron,system-ui,sans-serif;outline:none;}
-.time-input:focus{border-color:#22d3ee;box-shadow:0 0 0 2px rgba(34,211,238,.10);}
-.match-mode-select{background:rgba(0,0,0,.55);border:1px solid rgba(168,85,247,.28);border-radius:8px;color:#e9d5ff;padding:7px 10px;font-size:11px;font-weight:800;outline:none;}
-.match-time-hint{font-size:9px;color:#6b7280;}
+        .race-time-input { font-variant-numeric: tabular-nums; letter-spacing: .04em; }
+        .match-scoring-mode { min-width: 250px; }
 </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between selection:bg-purple-500 selection:text-white">
@@ -464,67 +450,124 @@
         function createMatches(count, playerCount) {
             return Array.from({ length: count }, () => ({
                 mapIndex: null,
-                mode: 'tournament',
+                scoringMode: 'tournament',
                 times: Array.from({ length: playerCount }, () => ''),
+                dnf: Array.from({ length: playerCount }, () => false),
                 scores: Array.from({ length: playerCount }, () => 0)
             }));
         }
 
-        // Thời gian nhập dạng 11111 => 1:11:11; 123456 => 12:34:56.
-        function parseFinishTime(value) {
-            const raw = String(value ?? '').trim();
-            if (!raw) return null;
-            if (raw.includes(':')) {
-                const parts = raw.split(':').map(x => Number(x));
-                if (parts.length !== 3 || parts.some(x => !Number.isFinite(x) || x < 0)) return null;
-                const [h,m,sec] = parts;
-                if (m >= 60 || sec >= 60) return null;
+        // ===== TIME / SCORING =====
+        // Thời gian:
+        // - 11111 -> 1:11:11
+        // - 1:11:11 -> 1:11:11
+        // - 1:11:11.25 -> 1:11:11.25 (hỗ trợ phần trăm giây)
+        // - X -> không hoàn thành (DNF)
+        function parseRaceTime(value) {
+            const raw = String(value ?? '').trim().toUpperCase();
+            if (!raw || raw === 'X') return null;
+
+            // H:MM:SS hoặc H:MM:SS.xx
+            const colon = raw.match(/^(\d{1,3}):(\d{1,2}):(\d{1,2})(?:\.(\d{1,2}))?$/);
+            if (colon) {
+                const h = Number(colon[1]);
+                const m = Number(colon[2]);
+                const sec = Number(colon[3]);
+                const fraction = colon[4] ? Number(`0.${colon[4]}`) : 0;
+                if (m > 59 || sec > 59) return null;
+                return h * 3600 + m * 60 + sec + fraction;
+            }
+
+            // Dạng số cũ: 11111 -> 1:11:11
+            if (/^\d+$/.test(raw)) {
+                let h = 0, m = 0, sec = 0;
+                if (raw.length <= 2) {
+                    sec = Number(raw);
+                } else if (raw.length <= 4) {
+                    m = Number(raw.slice(0, -2));
+                    sec = Number(raw.slice(-2));
+                } else {
+                    h = Number(raw.slice(0, -4));
+                    m = Number(raw.slice(-4, -2));
+                    sec = Number(raw.slice(-2));
+                }
+                if (m > 59 || sec > 59) return null;
                 return h * 3600 + m * 60 + sec;
             }
-            const digits = raw.replace(/\D/g, '');
-            if (!digits) return null;
-            const padded = digits.padStart(3, '0');
-            const sec = Number(padded.slice(-2));
-            const min = Number(padded.slice(-4, -2) || 0);
-            const hour = Number(padded.slice(0, -4) || 0);
-            if (min >= 60 || sec >= 60) return null;
-            return hour * 3600 + min * 60 + sec;
+
+            return null;
         }
 
-        function formatFinishTime(value) {
-            const seconds = parseFinishTime(value);
+        function formatRaceTime(value) {
+            const raw = String(value ?? '').trim().toUpperCase();
+            if (raw === 'X') return 'X';
+            const seconds = parseRaceTime(raw);
             if (seconds === null) return '';
-            const h = Math.floor(seconds / 3600);
-            const m = Math.floor((seconds % 3600) / 60);
-            const sec = seconds % 60;
-            return `${h}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+
+            const whole = Math.floor(seconds);
+            const fraction = Math.round((seconds - whole) * 100);
+            const h = Math.floor(whole / 3600);
+            const m = Math.floor((whole % 3600) / 60);
+            const sec = whole % 60;
+
+            // Chỉ hiện phần trăm giây khi người dùng có nhập.
+            const hasFraction = /\.\d{1,2}$/.test(raw);
+            return `${h}:${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}${hasFraction ? `.${String(fraction).padStart(2, '0')}` : ''}`;
         }
 
         function calculateMatchScores(match, playerCount) {
-            if (!Array.isArray(match.times)) match.times = Array.from({length: playerCount}, () => '');
+            if (!Array.isArray(match.times)) match.times = Array.from({ length: playerCount }, () => '');
+            if (!Array.isArray(match.dnf)) match.dnf = Array.from({ length: playerCount }, () => false);
             while (match.times.length < playerCount) match.times.push('');
-            if (match.times.length > playerCount) match.times.length = playerCount;
-            const times = match.times.map(parseFinishTime);
-            const finished = times.map((t, i) => t !== null ? { i, t } : null).filter(Boolean);
-            const scores = Array.from({length: playerCount}, () => 0);
+            while (match.dnf.length < playerCount) match.dnf.push(false);
+            match.times.length = playerCount;
+            match.dnf.length = playerCount;
 
-            if (match.mode === '1234') {
-                finished.sort((a,b) => a.t - b.t || a.i - b.i);
-                finished.forEach((item, rank) => {
-                    scores[item.i] = Math.max(1, 4 - rank);
-                });
-                // Không cán đích luôn được 1 điểm ở thể thức 1234.
-                times.forEach((t,i) => { if (t === null) scores[i] = 1; });
-            } else {
+            const finished = [];
+            for (let i = 0; i < playerCount; i++) {
+                const raw = String(match.times[i] ?? '').trim().toUpperCase();
+                const isDnf = match.dnf[i] || raw === 'X';
+                if (isDnf) {
+                    match.dnf[i] = true;
+                    match.times[i] = 'X';
+                    continue;
+                }
+                const t = parseRaceTime(match.times[i]);
+                if (t !== null) finished.push({ index: i, time: t });
+            }
+
+            const scores = Array(playerCount).fill(0);
+            const mode = match.scoringMode === '1234' ? '1234' : 'tournament';
+
+            if (mode === 'tournament') {
+                // Về nhất = 11 PTS.
+                // +0.01s đến +0.99s = 10 PTS
+                // +1.00s đến +1.99s = 9 PTS
+                // ...
+                // +9.00s đến +9.99s = 1 PTS
+                // Từ +10.00s trở lên = 0 PTS.
                 if (finished.length) {
-                    const fastest = Math.min(...finished.map(x => x.t));
-                    finished.forEach(item => {
-                        // Người nhanh nhất 11 điểm; chậm hơn N giây thì trừ N điểm.
-                        scores[item.i] = 11 - (item.t - fastest);
+                    const best = Math.min(...finished.map(x => x.time));
+                    finished.forEach(({ index, time }) => {
+                        const delay = Math.max(0, time - best);
+                        if (delay <= 0) {
+                            scores[index] = 11;
+                        } else {
+                            scores[index] = Math.max(0, 10 - Math.floor(delay));
+                        }
                     });
                 }
-                // Không cán đích = 0 điểm.
+                // X / DNF = 0 PTS.
+            } else {
+                // 1234: người có thời gian thấp hơn xếp trên.
+                // Hạng 1 = 4, hạng 2 = 3, hạng 3 = 2, hạng 4 = 1.
+                // Không hoàn thành (X) = 0.
+                finished.sort((a, b) => (a.time - b.time) || (a.index - b.index));
+                finished.forEach(({ index }, rank) => {
+                    scores[index] = Math.max(1, 4 - rank);
+                });
             }
+
             match.scores = scores;
             return scores;
         }
@@ -587,21 +630,33 @@
         function ensureGroupMatches(group) {
             if (!Array.isArray(group.matches)) {
                 const oldMap = Number.isInteger(group.mapIndex) ? group.mapIndex : null;
-                group.matches = [{ mapIndex: oldMap, mode: 'tournament', times: group.players.map(() => ''), scores: group.players.map(p => Number(p.points) || 0) }];
+                group.matches = [{
+                    mapIndex: oldMap,
+                    scoringMode: 'tournament',
+                    times: group.players.map(() => ''),
+                    dnf: group.players.map(() => false),
+                    scores: group.players.map(p => Number(p.points) || 0)
+                }];
             }
             group.matches.forEach(match => {
                 if (!Array.isArray(match.scores)) match.scores = [];
+                if (!Array.isArray(match.times)) match.times = Array.from({ length: group.players.length }, () => '');
+                if (!Array.isArray(match.dnf)) match.dnf = Array.from({ length: group.players.length }, () => false);
                 while (match.scores.length < group.players.length) match.scores.push(0);
-                if (match.scores.length > group.players.length) match.scores.length = group.players.length;
-                if (!Object.prototype.hasOwnProperty.call(match, 'mapIndex')) match.mapIndex = null;
-                if (!match.mode) match.mode = 'tournament';
-                if (!Array.isArray(match.times)) match.times = Array.from({length: group.players.length}, () => '');
                 while (match.times.length < group.players.length) match.times.push('');
+                while (match.dnf.length < group.players.length) match.dnf.push(false);
+                if (match.scores.length > group.players.length) match.scores.length = group.players.length;
                 if (match.times.length > group.players.length) match.times.length = group.players.length;
-                // Chỉ tự tính khi trận đã có thời gian; dữ liệu điểm cũ vẫn được giữ nguyên nếu chưa nhập thời gian.
-                if (match.times.some(v => String(v ?? '').trim() !== '')) calculateMatchScores(match, group.players.length);
+                if (match.dnf.length > group.players.length) match.dnf.length = group.players.length;
+                if (!Object.prototype.hasOwnProperty.call(match, 'mapIndex')) match.mapIndex = null;
+                if (!match.scoringMode) match.scoringMode = 'tournament';
+                // Recalculate only when time data exists; otherwise keep legacy scores.
+                if (match.times.some(v => String(v ?? '').trim()) || match.dnf.some(Boolean)) {
+                    calculateMatchScores(match, group.players.length);
+                }
             });
         }
+
         function totalPlayerPoints(group, playerIndex) {
             ensureGroupMatches(group);
             return group.matches.reduce((sum, match) => sum + (Number(match.scores[playerIndex]) || 0), 0);
@@ -666,16 +721,29 @@
                 group.matches.forEach((match, mIndex) => {
                     const selectedMap = Number.isInteger(match.mapIndex) ? inventory.maps[match.mapIndex] : null;
                     const selectedMapIndex = Number.isInteger(match.mapIndex) ? match.mapIndex : '';
+                    const mode = match.scoringMode === '1234' ? '1234' : 'tournament';
                     let scoreRows = '';
                     group.players.forEach((player, pIndex) => {
+                        const rawTime = match.times?.[pIndex] || '';
+                        const displayTime = formatRaceTime(rawTime);
+                        const isDnf = !!match.dnf?.[pIndex];
                         const score = Number(match.scores[pIndex]) || 0;
-                        const timeValue = escapeHtml(match.times?.[pIndex] ?? '');
                         scoreRows += `
-                            <div class="flex items-center gap-2 bg-black/30 rounded-lg px-2 py-1.5 border border-gray-800">
-                                <span class="text-[10px] text-gray-500 w-5 text-center">${pIndex + 1}</span>
-                                <span class="text-xs font-semibold text-gray-300 truncate flex-1">${escapeHtml(player.name)}</span>
-                                <input type="text" inputmode="numeric" value="${timeValue}" placeholder="00:00:00" data-match-time data-group="${gIndex}" data-match="${mIndex}" data-player="${pIndex}" class="time-input" aria-label="Thời gian ${escapeHtml(player.name)} trận ${mIndex + 1}">
-                                <span class="text-[9px] text-cyan-300 font-black w-12 text-right">${score}đ</span>
+                            <div class="grid grid-cols-[minmax(0,1fr)_150px_70px] items-center gap-2 bg-black/30 rounded-lg px-2 py-2 border border-gray-800">
+                                <div class="min-w-0 flex items-center gap-2">
+                                    <span class="text-[10px] text-gray-500 w-5 text-center">${pIndex + 1}</span>
+                                    <span class="text-xs font-semibold text-gray-300 truncate">${escapeHtml(player.name)}</span>
+                                </div>
+                                <div class="flex items-center gap-1">
+                                    <input type="text" inputmode="numeric" value="${escapeHtml(displayTime)}" data-race-time data-group="${gIndex}" data-match="${mIndex}" data-player="${pIndex}" placeholder="00:00:00 hoặc X" class="w-full bg-black/60 border border-gray-700 rounded-lg px-2 py-1.5 text-center text-cyan-300 font-bold focus:outline-none focus:border-cyan-400" aria-label="Thời gian ${escapeHtml(player.name)} trận ${mIndex + 1}">
+                                    <label class="text-[9px] text-red-300 flex items-center gap-1 whitespace-nowrap" title="Không cán đích">
+                                        <input type="checkbox" ${isDnf ? 'checked' : ''} data-race-dnf data-group="${gIndex}" data-match="${mIndex}" data-player="${pIndex}"> DNF
+                                    </label>
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-[8px] uppercase text-gray-600">Điểm</div>
+                                    <div class="orbitron font-black ${score < 0 ? 'text-red-300' : 'text-cyan-300'}">${score}</div>
+                                </div>
                             </div>`;
                     });
 
@@ -686,13 +754,13 @@
                                     <span class="w-8 h-8 rounded-lg bg-purple-500/15 border border-purple-500/30 flex items-center justify-center text-xs font-black text-purple-300">${mIndex + 1}</span>
                                     <div>
                                         <div class="text-xs font-black text-white uppercase">Trận ${mIndex + 1}</div>
-                                        <div class="text-[9px] text-gray-500">Nhập thời gian hoàn thành dạng 00:00:00 — ví dụ 11111 = 1:11:11</div>
+                                        <div class="text-[9px] text-gray-500">Nhập 00:00:00 · 11111 = 1:11:11 · có thể thêm .xx · nhập X nếu không hoàn thành</div>
                                     </div>
                                 </div>
-                                <div class="flex items-center gap-2 min-w-[300px] flex-1 justify-end flex-wrap">
-                                    <select class="match-mode-select" data-match-mode data-group="${gIndex}" data-match="${mIndex}" aria-label="Hình thức tính điểm trận ${mIndex + 1}">
-                                        <option value="tournament" ${match.mode === 'tournament' ? 'selected' : ''}>🏆 Đua theo hình thức giải đấu</option>
-                                        <option value="1234" ${match.mode === '1234' ? 'selected' : ''}>🔢 Đua theo hình thức 1234</option>
+                                <div class="flex flex-wrap items-center gap-2 justify-end">
+                                    <select class="inventory-select match-scoring-mode" data-group="${gIndex}" data-match="${mIndex}" aria-label="Hình thức tính điểm trận ${mIndex + 1}">
+                                        <option value="tournament" ${mode === 'tournament' ? 'selected' : ''}>🏆 Đua theo hình thức giải đấu</option>
+                                        <option value="1234" ${mode === '1234' ? 'selected' : ''}>🔢 Đua theo hình thức 1234</option>
                                     </select>
                                     <select class="inventory-select match-map-select max-w-sm" data-group="${gIndex}" data-match="${mIndex}" aria-label="Map trận ${mIndex + 1}">
                                         ${inventory.maps.length
@@ -704,7 +772,10 @@
                                         : `<div class="map-thumb shrink-0 flex items-center justify-center text-gray-600">🗺️</div>`}
                                 </div>
                             </div>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5">${scoreRows}</div>
+                            <div class="text-[10px] text-gray-500 mb-2">${mode === 'tournament'
+                                ? 'Giải đấu: về nhất = 11; +0.01–0.99s = 10; +1.00–1.99s = 9; ...; +9.00–9.99s = 1; từ +10s = 0; X = 0.'
+                                : '1234: thời gian ít hơn xếp trên → 4 / 3 / 2 / 1 điểm; X = 0.'}</div>
+                            <div class="grid grid-cols-1 gap-1.5">${scoreRows}</div>
                         </div>`;
                 });
 
@@ -763,19 +834,9 @@
                 card.innerHTML = `
                     <div class="p-4 border-b border-gray-800 bg-gradient-to-r from-purple-900/30 to-black/40">
                         <div class="flex flex-wrap items-center justify-between gap-3">
-                            <div class="flex items-center gap-2 min-w-0">
+                            <div class="flex items-center gap-2">
                                 <i class="fa-solid fa-trophy text-purple-400"></i>
-                                <div class="min-w-0">
-                                    <div class="text-[9px] uppercase font-bold text-gray-500 mb-1">Tên bảng đấu</div>
-                                    <input
-                                        type="text"
-                                        class="group-name-input group-name-editor"
-                                        data-group="${gIndex}"
-                                        value="${escapeHtml(group.name || `Bảng ${String.fromCharCode(65 + gIndex)}`)}"
-                                        placeholder="VD: Bảng Tốc Độ"
-                                        maxlength="40"
-                                    >
-                                </div>
+                                <h3 class="orbitron font-black text-lg text-white">${escapeHtml(group.name)}</h3>
                             </div>
                             <div class="flex items-center gap-2">
                                 <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-purple-500/10 text-purple-300 border border-purple-500/30">${group.players.length} Tuyển thủ</span>
@@ -804,7 +865,7 @@
                                     <span class="w-8 h-8 rounded-lg bg-purple-500/15 border border-purple-500/30 flex items-center justify-center text-purple-300">⌄</span>
                                     <div>
                                         <div class="text-xs font-black uppercase tracking-wider text-purple-300">Chi tiết ${group.matches.length} trận</div>
-                                        <div class="text-[10px] text-gray-500">Bấm để mở, chọn Map, chọn thể thức và nhập thời gian hoàn thành</div>
+                                        <div class="text-[10px] text-gray-500">Bấm để mở, chọn Map, chọn hình thức tính điểm và nhập thời gian từng trận</div>
                                     </div>
                                 </div>
                                 <i class="fa-solid fa-chevron-down text-gray-500 text-xs"></i>
@@ -836,49 +897,48 @@
             document.getElementById('statTotalGroups').innerText = tournamentData.length;
             document.getElementById('statTotalQualifiers').innerText = totalQualifiers;
 
-            grid.querySelectorAll('[data-match-time]').forEach(input => input.addEventListener('change', event => {
+            grid.querySelectorAll('.match-scoring-mode').forEach(select => select.addEventListener('change', event => {
+                const g = Number(event.target.dataset.group), m = Number(event.target.dataset.match);
+                tournamentData[g].matches[m].scoringMode = event.target.value === '1234' ? '1234' : 'tournament';
+                calculateMatchScores(tournamentData[g].matches[m], tournamentData[g].players.length);
+                tournamentData[g].players.forEach((pl, idx) => {
+                    pl.points = totalPlayerPoints(tournamentData[g], idx);
+                    pl.rank = null; pl.result = null;
+                });
+                saveToLocalStorage();
+                renderGroups();
+            }));
+
+            grid.querySelectorAll('[data-race-time]').forEach(input => input.addEventListener('change', event => {
                 const g = Number(event.target.dataset.group), m = Number(event.target.dataset.match), p = Number(event.target.dataset.player);
-                const raw = event.target.value.trim();
-                const parsed = parseFinishTime(raw);
-                if (raw && parsed === null) {
-                    showToast('Thời gian không hợp lệ. Dùng dạng 00:00:00 hoặc số như 11111 = 1:11:11', 'error');
+                const raw = event.target.value.trim().toUpperCase();
+                const formatted = formatRaceTime(raw);
+                if (raw && raw !== 'X' && !formatted) {
+                    showToast('Thời gian không hợp lệ. Hãy nhập 00:00:00, 11111 = 1:11:11 hoặc X nếu không hoàn thành.', 'error');
                     return;
                 }
-                tournamentData[g].matches[m].times[p] = raw ? formatFinishTime(raw) : '';
+                tournamentData[g].matches[m].times[p] = formatted;
+                tournamentData[g].matches[m].dnf[p] = (raw === 'X');
                 calculateMatchScores(tournamentData[g].matches[m], tournamentData[g].players.length);
                 tournamentData[g].players.forEach((pl, idx) => {
                     pl.points = totalPlayerPoints(tournamentData[g], idx);
-                    pl.rank = null;
-                    pl.result = null;
+                    pl.rank = null; pl.result = null;
                 });
                 saveToLocalStorage();
                 renderGroups();
             }));
 
-            grid.querySelectorAll('[data-match-mode]').forEach(select => select.addEventListener('change', event => {
-                const g = Number(event.target.dataset.group), m = Number(event.target.dataset.match);
-                tournamentData[g].matches[m].mode = event.target.value === '1234' ? '1234' : 'tournament';
+            grid.querySelectorAll('[data-race-dnf]').forEach(input => input.addEventListener('change', event => {
+                const g = Number(event.target.dataset.group), m = Number(event.target.dataset.match), p = Number(event.target.dataset.player);
+                tournamentData[g].matches[m].dnf[p] = event.target.checked;
+                tournamentData[g].matches[m].times[p] = event.target.checked ? 'X' : '';
                 calculateMatchScores(tournamentData[g].matches[m], tournamentData[g].players.length);
                 tournamentData[g].players.forEach((pl, idx) => {
                     pl.points = totalPlayerPoints(tournamentData[g], idx);
-                    pl.rank = null;
-                    pl.result = null;
+                    pl.rank = null; pl.result = null;
                 });
                 saveToLocalStorage();
                 renderGroups();
-            }));
-
-            grid.querySelectorAll('.group-name-editor').forEach(input => input.addEventListener('change', event => {
-                const g = Number(event.target.dataset.group);
-                if (!tournamentData[g]) return;
-
-                const fallback = `Bảng ${String.fromCharCode(65 + g)}`;
-                const newName = event.target.value.trim() || fallback;
-                tournamentData[g].name = newName;
-                event.target.value = newName;
-
-                saveToLocalStorage();
-                showToast(`Đã đổi tên ${newName}`, 'success');
             }));
 
             grid.querySelectorAll('.match-map-select').forEach(select => select.addEventListener('change', event => {
