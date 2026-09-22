@@ -459,7 +459,7 @@
 
         // ===== TIME / SCORING =====
         // Thời gian:
-        // - 11111 -> 1:11:11
+        // - 10704 -> 1:07.04
         // - 1:11:11 -> 1:11:11
         // - 1:11:11.25 -> 1:11:11.25 (hỗ trợ phần trăm giây)
         // - X -> không hoàn thành (DNF)
@@ -467,8 +467,8 @@
             const raw = String(value ?? '').trim().toUpperCase();
             if (!raw || raw === 'X') return null;
 
-            // H:MM:SS hoặc H:MM:SS.xx
-            const colon = raw.match(/^(\d{1,3}):(\d{1,2}):(\d{1,2})(?:\.(\d{1,2}))?$/);
+            // Dạng đầy đủ: H:MM:SS hoặc H:MM:SS.xx
+            let colon = raw.match(/^(\d{1,3}):(\d{1,2}):(\d{1,2})(?:\.(\d{1,2}))?$/);
             if (colon) {
                 const h = Number(colon[1]);
                 const m = Number(colon[2]);
@@ -478,21 +478,36 @@
                 return h * 3600 + m * 60 + sec + fraction;
             }
 
-            // Dạng số cũ: 11111 -> 1:11:11
+            // Dạng phút:giây.phần trăm, ví dụ 1:07.04
+            colon = raw.match(/^(\d{1,3}):(\d{2})(?:\.(\d{1,2}))$/);
+            if (colon) {
+                const m = Number(colon[1]);
+                const sec = Number(colon[2]);
+                const fraction = Number(`0.${colon[3]}`);
+                if (sec > 59) return null;
+                return m * 60 + sec + fraction;
+            }
+
+            // Nhập nhanh mới: 10704 -> 1:07.04
+            // 5 chữ số = phút + 2 chữ số giây + 2 chữ số phần trăm giây.
+            if (/^\d{5}$/.test(raw)) {
+                const m = Number(raw.slice(0, -4));
+                const sec = Number(raw.slice(-4, -2));
+                const centis = Number(raw.slice(-2));
+                if (sec > 59 || centis > 99) return null;
+                return m * 60 + sec + centis / 100;
+            }
+
+            // Dạng số nguyên không có phần trăm: 11111 vẫn được hiểu theo nhập nhanh mới
+            // là 1:11.11; các số ngắn hơn được hiểu là giây.
             if (/^\d+$/.test(raw)) {
-                let h = 0, m = 0, sec = 0;
-                if (raw.length <= 2) {
-                    sec = Number(raw);
-                } else if (raw.length <= 4) {
-                    m = Number(raw.slice(0, -2));
-                    sec = Number(raw.slice(-2));
-                } else {
-                    h = Number(raw.slice(0, -4));
-                    m = Number(raw.slice(-4, -2));
-                    sec = Number(raw.slice(-2));
+                if (raw.length <= 2) return Number(raw);
+                if (raw.length <= 4) {
+                    const sec = Number(raw.slice(-2));
+                    const m = Number(raw.slice(0, -2));
+                    if (sec > 59) return null;
+                    return m * 60 + sec;
                 }
-                if (m > 59 || sec > 59) return null;
-                return h * 3600 + m * 60 + sec;
             }
 
             return null;
@@ -506,12 +521,16 @@
 
             const whole = Math.floor(seconds);
             const fraction = Math.round((seconds - whole) * 100);
+            const totalMinutes = Math.floor(whole / 60);
+            const sec = whole % 60;
+            const hasFraction = /\.\d{1,2}$/.test(raw) || /^\d{5}$/.test(raw);
+
+            if (whole < 3600) {
+                return `${totalMinutes}:${String(sec).padStart(2, '0')}${hasFraction ? `.${String(fraction).padStart(2, '0')}` : ''}`;
+            }
+
             const h = Math.floor(whole / 3600);
             const m = Math.floor((whole % 3600) / 60);
-            const sec = whole % 60;
-
-            // Chỉ hiện phần trăm giây khi người dùng có nhập.
-            const hasFraction = /\.\d{1,2}$/.test(raw);
             return `${h}:${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}${hasFraction ? `.${String(fraction).padStart(2, '0')}` : ''}`;
         }
 
@@ -742,7 +761,7 @@
                                     <span class="text-xs font-semibold text-gray-300 truncate">${escapeHtml(player.name)}</span>
                                 </div>
                                 <div class="flex items-center gap-1">
-                                    <input type="text" inputmode="numeric" value="${escapeHtml(displayTime)}" data-race-time data-group="${gIndex}" data-match="${mIndex}" data-player="${pIndex}" placeholder="00:00:00 hoặc X" class="w-full bg-black/60 border border-gray-700 rounded-lg px-2 py-1.5 text-center text-cyan-300 font-bold focus:outline-none focus:border-cyan-400" aria-label="Thời gian ${escapeHtml(player.name)} trận ${mIndex + 1}">
+                                    <input type="text" inputmode="numeric" value="${escapeHtml(displayTime)}" data-race-time data-group="${gIndex}" data-match="${mIndex}" data-player="${pIndex}" placeholder="1:07.04 hoặc X" class="w-full bg-black/60 border border-gray-700 rounded-lg px-2 py-1.5 text-center text-cyan-300 font-bold focus:outline-none focus:border-cyan-400" aria-label="Thời gian ${escapeHtml(player.name)} trận ${mIndex + 1}">
                                     <label class="text-[9px] text-red-300 flex items-center gap-1 whitespace-nowrap" title="Không cán đích">
                                         <input type="checkbox" ${isDnf ? 'checked' : ''} data-race-dnf data-group="${gIndex}" data-match="${mIndex}" data-player="${pIndex}"> DNF
                                     </label>
@@ -761,7 +780,7 @@
                                     <span class="w-8 h-8 rounded-lg bg-purple-500/15 border border-purple-500/30 flex items-center justify-center text-xs font-black text-purple-300">${mIndex + 1}</span>
                                     <div>
                                         <div class="text-xs font-black text-white uppercase">Trận ${mIndex + 1}</div>
-                                        <div class="text-[9px] text-gray-500">Nhập 00:00:00 · 11111 = 1:11:11 · có thể thêm .xx · nhập X nếu không hoàn thành</div>
+                                        <div class="text-[9px] text-gray-500">Nhập nhanh: 10704 = 1:07.04 · có thể nhập 1:07.04 hoặc 00:01:07.04 · nhập X nếu không hoàn thành</div>
                                     </div>
                                 </div>
                                 <div class="flex flex-wrap items-center gap-2 justify-end">
@@ -780,7 +799,7 @@
                                 </div>
                             </div>
                             <div class="text-[10px] text-gray-500 mb-2">${mode === 'tournament'
-                                ? 'Giải đấu: về nhất = 11; +0.01–0.99s = 10; +1.00–1.99s = 9; ...; +9.00–9.99s = 1; từ +10s = 0; X = 0.'
+                                ? 'Giải đấu: về nhất = 11; +0.01–0.99s = 10; +1.00–1.99s = 9; +2.00–2.99s = 8; ...; +9.00–9.99s = 1; từ +10.00s = 0; X = 0.'
                                 : '1234: thời gian ít hơn xếp trên → 4 / 3 / 2 / 1 điểm; X = 0.'}</div>
                             <div class="grid grid-cols-1 gap-1.5">${scoreRows}</div>
                         </div>`;
