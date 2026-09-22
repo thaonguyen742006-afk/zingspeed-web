@@ -559,35 +559,60 @@
             const mode = match.scoringMode === '1234' ? '1234' : 'tournament';
 
             if (mode === 'tournament') {
-                // Về nhất = 11 PTS.
-                // +0.01s đến +0.99s = 10 PTS
-                // +1.00s đến +1.99s = 9 PTS
-                // ...
-                // +9.00s đến +9.99s = 1 PTS
-                // Từ +10.00s trở lên = 0 PTS.
+                // LUẬT GIẢI ĐẤU:
+                // - Người HẠNG 1 (thời gian nhỏ nhất) luôn = 11 PTS.
+                // - TẤT CẢ người còn lại đều lấy thời gian của HẠNG 1 làm mốc.
+                // - Không được trừ theo người đứng ngay trước.
+                // - Chậm 0.01..0.99s  = 10 PTS
+                // - Chậm 1.00..1.99s  = 9 PTS
+                // - Chậm 2.00..2.99s  = 8 PTS
+                // - ...
+                // - Chậm 9.00..9.99s  = 1 PTS
+                // - Chậm >= 10.00s    = 0 PTS
+                // - X / DNF            = 0 PTS
+                // Ví dụ: Hạng 1 = 1:11.11; 1:11.13 -> 10; 1:12.12 -> 9; 1:13.21 -> 8.
                 if (finished.length) {
-                    const best = Math.min(...finished.map(x => x.time));
-                    finished.forEach(({ index, time }) => {
-                        // Làm tròn độ trễ đến 0.01s để tránh sai số floating-point.
-                        const delay = Math.max(0, Math.round((time - best) * 100) / 100);
+                    const ranking = [...finished].sort((a, b) => (a.time - b.time) || (a.index - b.index));
+                    const winnerTime = ranking[0].time; // CHỈ dùng HẠNG 1 làm mốc
 
-                        if (delay === 0) {
-                            // Về nhất (hoặc đồng thời bằng thời gian tốt nhất).
+                    ranking.forEach(({ index, time }, rank) => {
+                        if (rank === 0) {
                             scores[index] = 11;
-                        } else if (delay >= 10) {
-                            // Từ +10.00s trở lên = 0 điểm.
-                            scores[index] = 0;
+                            return;
+                        }
+
+                        // Tính độ trễ trực tiếp so với HẠNG 1, làm tròn đến 0.01s.
+                        const delay = Math.max(0, Math.round((time - winnerTime) * 100) / 100);
+
+                        if (delay < 1) {
+                            scores[index] = 10;
+                        } else if (delay < 2) {
+                            scores[index] = 9;
+                        } else if (delay < 3) {
+                            scores[index] = 8;
+                        } else if (delay < 4) {
+                            scores[index] = 7;
+                        } else if (delay < 5) {
+                            scores[index] = 6;
+                        } else if (delay < 6) {
+                            scores[index] = 5;
+                        } else if (delay < 7) {
+                            scores[index] = 4;
+                        } else if (delay < 8) {
+                            scores[index] = 3;
+                        } else if (delay < 9) {
+                            scores[index] = 2;
+                        } else if (delay < 10) {
+                            scores[index] = 1;
                         } else {
-                            // +0.01..0.99 = 10; +1.00..1.99 = 9; ... +9.00..9.99 = 1.
-                            scores[index] = 10 - Math.floor(delay);
+                            scores[index] = 0;
                         }
                     });
                 }
-                // X / DNF = 0 PTS.
             } else {
-                // 1234: người có thời gian thấp hơn xếp trên.
-                // Hạng 1 = 4, hạng 2 = 3, hạng 3 = 2, hạng 4 = 1.
-                // Không hoàn thành (X) = 0.
+                // 1234: xếp hạng theo thời gian nhỏ -> lớn.
+                // Hạng 1 = 4, hạng 2 = 3, hạng 3 = 2, hạng 4 trở đi = 1.
+                // X / DNF = 0.
                 finished.sort((a, b) => (a.time - b.time) || (a.index - b.index));
                 finished.forEach(({ index }, rank) => {
                     scores[index] = Math.max(1, 4 - rank);
