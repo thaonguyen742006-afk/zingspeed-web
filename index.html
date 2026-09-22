@@ -582,27 +582,27 @@
                         }
 
                         // Tính độ trễ trực tiếp so với HẠNG 1, làm tròn đến 0.01s.
-                        const delay = Math.max(0, Math.round((time - winnerTime) * 100) / 100);
+                        const delay = Math.max(0, time - winnerTime);
 
-                        if (delay < 1) {
+                        if (delay < 1000) {
                             scores[index] = 10;
-                        } else if (delay < 2) {
+                        } else if (delay < 2000) {
                             scores[index] = 9;
-                        } else if (delay < 3) {
+                        } else if (delay < 3000) {
                             scores[index] = 8;
-                        } else if (delay < 4) {
+                        } else if (delay < 4000) {
                             scores[index] = 7;
-                        } else if (delay < 5) {
+                        } else if (delay < 5000) {
                             scores[index] = 6;
-                        } else if (delay < 6) {
+                        } else if (delay < 6000) {
                             scores[index] = 5;
-                        } else if (delay < 7) {
+                        } else if (delay < 7000) {
                             scores[index] = 4;
-                        } else if (delay < 8) {
+                        } else if (delay < 8000) {
                             scores[index] = 3;
-                        } else if (delay < 9) {
+                        } else if (delay < 9000) {
                             scores[index] = 2;
-                        } else if (delay < 10) {
+                        } else if (delay < 10000) {
                             scores[index] = 1;
                         } else {
                             scores[index] = 0;
@@ -787,9 +787,6 @@
                                 </div>
                                 <div class="flex items-center gap-1">
                                     <input type="text" inputmode="numeric" value="${escapeHtml(displayTime)}" data-race-time data-group="${gIndex}" data-match="${mIndex}" data-player="${pIndex}" placeholder="1:07.04 hoặc X" class="w-full bg-black/60 border border-gray-700 rounded-lg px-2 py-1.5 text-center text-cyan-300 font-bold focus:outline-none focus:border-cyan-400" aria-label="Thời gian ${escapeHtml(player.name)} trận ${mIndex + 1}">
-                                    <label class="text-[9px] text-red-300 flex items-center gap-1 whitespace-nowrap" title="Không cán đích">
-                                        <input type="checkbox" ${isDnf ? 'checked' : ''} data-race-dnf data-group="${gIndex}" data-match="${mIndex}" data-player="${pIndex}"> DNF
-                                    </label>
                                 </div>
                                 <div class="text-right">
                                     <div class="text-[8px] uppercase text-gray-600">Điểm</div>
@@ -970,19 +967,6 @@
                 }
                 tournamentData[g].matches[m].times[p] = formatted;
                 tournamentData[g].matches[m].dnf[p] = (raw === 'X');
-                calculateMatchScores(tournamentData[g].matches[m], tournamentData[g].players.length);
-                tournamentData[g].players.forEach((pl, idx) => {
-                    pl.points = totalPlayerPoints(tournamentData[g], idx);
-                    pl.rank = null; pl.result = null;
-                });
-                saveToLocalStorage();
-                renderGroups();
-            }));
-
-            grid.querySelectorAll('[data-race-dnf]').forEach(input => input.addEventListener('change', event => {
-                const g = Number(event.target.dataset.group), m = Number(event.target.dataset.match), p = Number(event.target.dataset.player);
-                tournamentData[g].matches[m].dnf[p] = event.target.checked;
-                tournamentData[g].matches[m].times[p] = event.target.checked ? 'X' : '';
                 calculateMatchScores(tournamentData[g].matches[m], tournamentData[g].players.length);
                 tournamentData[g].players.forEach((pl, idx) => {
                     pl.points = totalPlayerPoints(tournamentData[g], idx);
