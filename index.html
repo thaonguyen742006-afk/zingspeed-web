@@ -177,6 +177,18 @@
         .glow-text-purple { text-shadow: 0 0 10px rgba(255,154,162,.55) !important; }
         .glow-text-cyan { text-shadow: 0 0 10px rgba(181,234,215,.55) !important; }
         .inventory-select:focus { border-color: #B5EAD7 !important; box-shadow: 0 0 0 2px rgba(181,234,215,.12); }
+        .group-name-input {
+            width: min(260px, 100%);
+            background: rgba(0,0,0,.35);
+            border: 1px solid rgba(255,255,255,.12);
+            border-radius: 8px;
+            color: #fff;
+            padding: 7px 10px;
+            font-size: 13px;
+            font-weight: 800;
+            outline: none;
+        }
+        .group-name-input:focus { border-color: #B5EAD7; box-shadow: 0 0 0 2px rgba(181,234,215,.10); }
         .inventory-thumb, .map-thumb { border-color: rgba(255,183,178,.38); background: rgba(23,25,35,.55); }
         ::-webkit-scrollbar-track { background: #171923; }
         ::-webkit-scrollbar-thumb { background: #4b5068; }
@@ -674,9 +686,19 @@
                 card.innerHTML = `
                     <div class="p-4 border-b border-gray-800 bg-gradient-to-r from-purple-900/30 to-black/40">
                         <div class="flex flex-wrap items-center justify-between gap-3">
-                            <div class="flex items-center gap-2">
+                            <div class="flex items-center gap-2 min-w-0">
                                 <i class="fa-solid fa-trophy text-purple-400"></i>
-                                <h3 class="orbitron font-black text-lg text-white">${escapeHtml(group.name)}</h3>
+                                <div class="min-w-0">
+                                    <div class="text-[9px] uppercase font-bold text-gray-500 mb-1">Tên bảng đấu</div>
+                                    <input
+                                        type="text"
+                                        class="group-name-input group-name-editor"
+                                        data-group="${gIndex}"
+                                        value="${escapeHtml(group.name || `Bảng ${String.fromCharCode(65 + gIndex)}`)}"
+                                        placeholder="VD: Bảng Tốc Độ"
+                                        maxlength="40"
+                                    >
+                                </div>
                             </div>
                             <div class="flex items-center gap-2">
                                 <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-purple-500/10 text-purple-300 border border-purple-500/30">${group.players.length} Tuyển thủ</span>
@@ -750,6 +772,19 @@
                 });
                 saveToLocalStorage();
                 renderGroups();
+            }));
+
+            grid.querySelectorAll('.group-name-editor').forEach(input => input.addEventListener('change', event => {
+                const g = Number(event.target.dataset.group);
+                if (!tournamentData[g]) return;
+
+                const fallback = `Bảng ${String.fromCharCode(65 + g)}`;
+                const newName = event.target.value.trim() || fallback;
+                tournamentData[g].name = newName;
+                event.target.value = newName;
+
+                saveToLocalStorage();
+                showToast(`Đã đổi tên ${newName}`, 'success');
             }));
 
             grid.querySelectorAll('.match-map-select').forEach(select => select.addEventListener('change', event => {
