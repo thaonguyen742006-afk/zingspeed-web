@@ -458,55 +458,59 @@
         }
 
         // ===== TIME / SCORING =====
-        // Thời gian:
-        // - 10704 -> 1:07.04
-        // - 1:11:11 -> 1:11:11
-        // - 1:11:11.25 -> 1:11:11.25 (hỗ trợ phần trăm giây)
+        // Thời gian dùng dạng PHÚT:GIÂY:MILI-GIÂY.
+        // Ví dụ:
+        // - 1:11:11 = 1 phút 11 giây 11 ms
+        // - 1:11:13 = 1 phút 11 giây 13 ms (chậm 2 ms)
+        // - 1:12:56 = 1 phút 12 giây 56 ms
+        // - 11111 -> 1:11:11
         // - X -> không hoàn thành (DNF)
+        // Nội bộ: parseRaceTime trả về MILLISECOND.
         function parseRaceTime(value) {
             const raw = String(value ?? '').trim().toUpperCase();
             if (!raw || raw === 'X') return null;
 
-            // Dạng đầy đủ: H:MM:SS hoặc H:MM:SS.xx
-            let colon = raw.match(/^(\d{1,3}):(\d{1,2}):(\d{1,2})(?:\.(\d{1,2}))?$/);
+            // Dạng PHÚT:GIÂY:MILI-GIÂY, ví dụ 1:12:56
+            // Phần cuối được hiểu trực tiếp là millisecond (00-99 theo format 2 chữ số).
+            let colon = raw.match(/^(\d{1,4}):(\d{1,2}):(\d{1,3})$/);
             if (colon) {
-                const h = Number(colon[1]);
-                const m = Number(colon[2]);
-                const sec = Number(colon[3]);
-                const fraction = colon[4] ? Number(`0.${colon[4]}`) : 0;
-                if (m > 59 || sec > 59) return null;
-                return h * 3600 + m * 60 + sec + fraction;
+                const minutes = Number(colon[1]);
+                const seconds = Number(colon[2]);
+                const milliseconds = Number(colon[3]);
+                if (seconds > 59 || milliseconds > 999) return null;
+                return minutes * 60000 + seconds * 1000 + milliseconds;
             }
 
-            // Dạng phút:giây.phần trăm, ví dụ 1:07.04
-            colon = raw.match(/^(\d{1,3}):(\d{2})(?:\.(\d{1,2}))$/);
+            // Dạng phút:giây.phần thập phân giây, ví dụ 1:12.56
+            // .56 giây = 560 ms. Giữ để tương thích dữ liệu cũ.
+            colon = raw.match(/^(\d{1,4}):(\d{2})\.(\d{1,3})$/);
             if (colon) {
-                const m = Number(colon[1]);
-                const sec = Number(colon[2]);
-                const fraction = Number(`0.${colon[3]}`);
-                if (sec > 59) return null;
-                return m * 60 + sec + fraction;
+                const minutes = Number(colon[1]);
+                const seconds = Number(colon[2]);
+                const fractionText = colon[3];
+                const fractionMs = Number(fractionText.padEnd(3, '0'));
+                if (seconds > 59 || fractionMs > 999) return null;
+                return minutes * 60000 + seconds * 1000 + fractionMs;
             }
 
-            // Nhập nhanh mới: 10704 -> 1:07.04
-            // 5 chữ số = phút + 2 chữ số giây + 2 chữ số phần trăm giây.
+            // Dạng nhanh 5 chữ số: 11111 -> 1:11:11
+            // = phút + 2 chữ số giây + 2 chữ số millisecond.
             if (/^\d{5}$/.test(raw)) {
-                const m = Number(raw.slice(0, -4));
-                const sec = Number(raw.slice(-4, -2));
-                const centis = Number(raw.slice(-2));
-                if (sec > 59 || centis > 99) return null;
-                return m * 60 + sec + centis / 100;
+                const minutes = Number(raw.slice(0, -4));
+                const seconds = Number(raw.slice(-4, -2));
+                const milliseconds = Number(raw.slice(-2));
+                if (seconds > 59 || milliseconds > 99) return null;
+                return minutes * 60000 + seconds * 1000 + milliseconds;
             }
 
-            // Dạng số nguyên không có phần trăm: 11111 vẫn được hiểu theo nhập nhanh mới
-            // là 1:11.11; các số ngắn hơn được hiểu là giây.
+            // Số nguyên ngắn: hiểu là số giây.
             if (/^\d+$/.test(raw)) {
-                if (raw.length <= 2) return Number(raw);
+                if (raw.length <= 2) return Number(raw) * 1000;
                 if (raw.length <= 4) {
-                    const sec = Number(raw.slice(-2));
-                    const m = Number(raw.slice(0, -2));
-                    if (sec > 59) return null;
-                    return m * 60 + sec;
+                    const seconds = Number(raw.slice(-2));
+                    const minutes = Number(raw.slice(0, -2));
+                    if (seconds > 59) return null;
+                    return minutes * 60000 + seconds * 1000;
                 }
             }
 
@@ -516,22 +520,29 @@
         function formatRaceTime(value) {
             const raw = String(value ?? '').trim().toUpperCase();
             if (raw === 'X') return 'X';
-            const seconds = parseRaceTime(raw);
-            if (seconds === null) return '';
+            const millisecondsTotal = parseRaceTime(raw);
+            if (millisecondsTotal === null) return '';
 
-            const whole = Math.floor(seconds);
-            const fraction = Math.round((seconds - whole) * 100);
-            const totalMinutes = Math.floor(whole / 60);
-            const sec = whole % 60;
-            const hasFraction = /\.\d{1,2}$/.test(raw) || /^\d{5}$/.test(raw);
+            const minutes = Math.floor(millisecondsTotal / 60000);
+            const seconds = Math.floor((millisecondsTotal % 60000) / 1000);
+            const milliseconds = millisecondsTotal % 1000;
 
-            if (whole < 3600) {
-                return `${totalMinutes}:${String(sec).padStart(2, '0')}${hasFraction ? `.${String(fraction).padStart(2, '0')}` : ''}`;
+            // Format chuẩn mới: phút:giây:mili-giây
+            // Với input 2 chữ số ở phần cuối, giữ 2 chữ số để hiển thị như 1:11:11.
+            const hasMillisecondPart =
+                /^\d{1,4}:\d{1,2}:\d{1,3}$/.test(raw) ||
+                /^\d{5}$/.test(raw) ||
+                /\.\d{1,3}$/.test(raw);
+
+            if (!hasMillisecondPart) {
+                return `${minutes}:${String(seconds).padStart(2, '0')}`;
             }
 
-            const h = Math.floor(whole / 3600);
-            const m = Math.floor((whole % 3600) / 60);
-            return `${h}:${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}${hasFraction ? `.${String(fraction).padStart(2, '0')}` : ''}`;
+            const msText = milliseconds >= 100
+                ? String(milliseconds).padStart(3, '0')
+                : String(milliseconds).padStart(2, '0');
+
+            return `${minutes}:${String(seconds).padStart(2, '0')}:${msText}`;
         }
 
         function calculateMatchScores(match, playerCount) {
@@ -552,7 +563,7 @@
                     continue;
                 }
                 const t = parseRaceTime(match.times[i]);
-                if (t !== null) finished.push({ index: i, time: t });
+                if (Number.isFinite(t)) finished.push({ index: i, time: t });
             }
 
             const scores = Array(playerCount).fill(0);
@@ -570,7 +581,7 @@
                 // - Chậm 9.00..9.99s  = 1 PTS
                 // - Chậm >= 10.00s    = 0 PTS
                 // - X / DNF            = 0 PTS
-                // Ví dụ: Hạng 1 = 1:11.11; 1:11.13 -> 10; 1:12.12 -> 9; 1:13.21 -> 8.
+                // Ví dụ: Hạng 1 = 1:11:11; 1:11:13 -> 10; 1:12:56 -> 9; 1:13:21 -> 8.
                 if (finished.length) {
                     const ranking = [...finished].sort((a, b) => (a.time - b.time) || (a.index - b.index));
                     const winnerTime = ranking[0].time; // CHỈ dùng HẠNG 1 làm mốc
@@ -581,7 +592,9 @@
                             return;
                         }
 
-                        // Tính độ trễ trực tiếp so với HẠNG 1, làm tròn đến 0.01s.
+                        // time và winnerTime đều là MILLISECOND.
+                        // Ví dụ 1:11:11 = 71011 ms; 1:12:56 = 72056 ms;
+                        // độ trễ = 1045 ms = 1.045 giây.
                         const delay = Math.max(0, time - winnerTime);
 
                         if (delay < 1000) {
@@ -714,6 +727,12 @@
         }
 
         function renderGroups() {
+            // Luôn tính lại điểm trước khi vẽ giao diện để không dùng scores cũ trong localStorage.
+            tournamentData.forEach(group => {
+                ensureGroupMatches(group);
+                group.matches.forEach(match => calculateMatchScores(match, group.players.length));
+            });
+
             const grid = document.getElementById('groupsGrid');
             // Keep opened match-detail panels open after re-rendering.
             const openDetails = new Set(
@@ -802,7 +821,7 @@
                                     <span class="w-8 h-8 rounded-lg bg-purple-500/15 border border-purple-500/30 flex items-center justify-center text-xs font-black text-purple-300">${mIndex + 1}</span>
                                     <div>
                                         <div class="text-xs font-black text-white uppercase">Trận ${mIndex + 1}</div>
-                                        <div class="text-[9px] text-gray-500">Nhập nhanh: 10704 = 1:07.04 · có thể nhập 1:07.04 hoặc 00:01:07.04 · nhập X nếu không hoàn thành</div>
+                                        <div class="text-[9px] text-gray-500">Nhập nhanh: 11111 = 1:11:11 (phút:giây:mili-giây) · có thể nhập 1:11:11 · nhập X nếu không hoàn thành</div>
                                     </div>
                                 </div>
                                 <div class="flex flex-wrap items-center gap-2 justify-end">
@@ -962,7 +981,7 @@
                 const raw = event.target.value.trim().toUpperCase();
                 const formatted = formatRaceTime(raw);
                 if (raw && raw !== 'X' && !formatted) {
-                    showToast('Thời gian không hợp lệ. Hãy nhập 00:00:00, 11111 = 1:11:11 hoặc X nếu không hoàn thành.', 'error');
+                    showToast('Thời gian không hợp lệ. Hãy nhập phút:giây:mili-giây (ví dụ 1:11:11), 11111 = 1:11:11 hoặc X nếu không hoàn thành.', 'error');
                     return;
                 }
                 tournamentData[g].matches[m].times[p] = formatted;
