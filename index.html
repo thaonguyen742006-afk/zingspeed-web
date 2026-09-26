@@ -1330,6 +1330,13 @@
                     { groups: 2, size: 4, matches: 7 },
                     { groups: 2, size: 3, matches: 7 },
                     { groups: 1, size: 4, matches: 9, final: true }
+                ],
+                6: [
+                    { groups: 2, size: 3, matches: 7 },
+                    { groups: 1, size: 4, matches: 9, final: true }
+                ],
+                4: [
+                    { groups: 1, size: 4, matches: 9, final: true }
                 ]
             };
             return plans[n] || null;
@@ -1449,7 +1456,7 @@
             return true;
         }
 
-        // Override the old manual draw with automatic elimination for 8/9/12/16 players.
+        // Override the old manual draw with automatic elimination for 4/6/8/9/12/16 players.
         const legacyTriggerRandomDraw = window.triggerRandomDraw;
         window.triggerRandomDraw = function() {
             const players = getPlayerList();
