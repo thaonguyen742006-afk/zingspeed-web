@@ -955,25 +955,6 @@
                             </div>
                             <div class="space-y-1.5">${summaryRows}</div>
 
-                    <div class="mt-4 rounded-xl border border-purple-500/20 bg-black/20 overflow-hidden">
-                        <div class="px-3 py-2 border-b border-gray-800 flex items-center justify-between">
-                            <span class="text-[10px] font-black uppercase tracking-wider text-purple-300">BẢNG XẾP HẠNG</span>
-                            <span class="text-[9px] text-gray-500">Tổng điểm các trận</span>
-                        </div>
-                        <div class="grid grid-cols-[44px_minmax(0,1fr)_80px_82px] gap-2 px-3 py-2 text-[9px] uppercase font-bold text-gray-500 border-b border-gray-800">
-                            <span class="text-center">Hạng</span><span>Tuyển thủ</span><span class="text-right">Tổng điểm</span><span class="text-right">Trạng thái</span>
-                        </div>
-                        <div class="divide-y divide-gray-900">
-                            ${[...group.players].sort((a,b) => ((a.rank || 999) - (b.rank || 999))).map((player, idx) => `
-                                <div class="grid grid-cols-[44px_minmax(0,1fr)_80px_82px] items-center gap-2 px-3 py-2">
-                                    <span class="text-center font-black ${idx === 0 ? 'text-yellow-300' : 'text-gray-400'}">${player.rank || idx + 1}</span>
-                                    <span class="truncate text-xs font-semibold text-gray-200">${escapeHtml(player.name)}</span>
-                                    <span class="text-right orbitron font-black text-cyan-300">${Number(player.points) || 0}</span>
-                                    <span class="text-right text-[9px] font-bold ${player.result === 'eliminated' ? 'text-red-300' : player.result === 'qualified' ? 'text-yellow-300' : 'text-gray-600'}">${player.result === 'eliminated' ? 'LOẠI' : player.result === 'qualified' ? 'ĐI TIẾP' : '—'}</span>
-                                </div>`).join('')}
-                        </div>
-                    </div>
-                        </div>
 
                         <!-- DROPDOWN MATCH DETAILS -->
                         <details class="matches-details rounded-xl border border-purple-500/20 bg-black/15" data-key="${detailsKey}"${detailsOpen}>
