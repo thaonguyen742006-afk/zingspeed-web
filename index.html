@@ -296,6 +296,12 @@
                         <p class="text-[11px] text-gray-400 mt-1">Ví dụ: bảng 4 người → mặc định Top 3 đi tiếp, người thấp điểm nhất bị loại.</p>
                     </div>
 
+                    <div id="autoTournamentRules" class="rounded-xl border border-cyan-500/30 bg-cyan-500/5 p-3">
+                        <div class="text-cyan-300 font-black text-xs uppercase mb-2"><i class="fa-solid fa-wand-magic-sparkles mr-1"></i> LUẬT TỰ CHIA</div>
+                        <div id="autoRuleText" class="text-[11px] text-gray-300 leading-5"></div>
+                        <div class="text-[10px] text-gray-500 mt-2">Tự xáo trộn → chia bảng → mỗi bảng loại 1 người thấp điểm nhất → người còn lại sang vòng sau. Chung kết 4 người BO9.</div>
+                    </div>
+
                     <!-- Submit Button -->
                     <button type="submit" id="drawBtn" class="w-full py-3.5 px-6 rounded-xl orbitron font-black text-sm tracking-widest text-white bg-gradient-to-r from-purple-600 via-pink-600 to-cyan-500 hover:from-purple-500 hover:to-cyan-400 transition-all transform active:scale-95 shadow-neon-purple flex items-center justify-center gap-2">
                         <i class="fa-solid fa-shuffle"></i> CHIA BẢNG NGẪU NHIÊN
@@ -380,6 +386,12 @@
             </div>
 
             <!-- Groups Cards Container -->
+            <div id="roundToolbar" class="glass-panel p-3 rounded-2xl border border-cyan-500/20 mb-4">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                    <div class="flex items-center gap-2"><span id="currentRoundBadge" class="px-3 py-1.5 rounded-lg bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-xs font-black">VÒNG 1</span><span id="currentRoundInfo" class="text-[11px] text-gray-400"></span></div>
+                    <div class="flex gap-2"><button type="button" onclick="showPreviousRound()" class="px-3 py-1.5 rounded-lg bg-gray-800 text-gray-200 text-xs font-bold border border-gray-700">XEM VÒNG CŨ</button><button type="button" id="nextRoundBtn" onclick="advanceToNextRound()" class="px-3 py-1.5 rounded-lg bg-gradient-to-r from-purple-600 to-cyan-500 text-white text-xs font-black">TẠO VÒNG TIẾP</button></div>
+                </div><div id="roundHistoryButtons" class="flex flex-wrap gap-1.5 mt-2"></div>
+            </div>
             <div id="groupsGrid" class="grid grid-cols-1 md:grid-cols-2 gap-5 flex-grow">
                 <!-- Group cards generated dynamically via JS -->
             </div>
@@ -404,6 +416,7 @@
         let currentMode = 'auto';
         let tournamentData = [];
         let qualifyCount = 3;
+        let tournamentMeta = { auto: true, initialPlayerCount: 16, roundIndex: 0, roundConfigs: [], history: [], final: false };
 
         // Google Sheet inventory. Players are configured on this website.
         const SHEET_ID = '1_zrKpwAp0s8hMv8LZK208Qc-0SGE6npj_offF3ej5cw';
@@ -415,6 +428,7 @@
             if (tournamentData.length === 0) triggerRandomDraw();
             else renderGroups();
             await loadSheetData(false);
+            document.getElementById('playerCountInput')?.addEventListener('input', updateAutoRuleText);
         });
 
         function switchInputMode(mode) {
@@ -434,6 +448,11 @@
                 manualSection.classList.remove('hidden');
                 autoSection.classList.add('hidden');
             }
+            document.getElementById('autoTournamentRules')?.classList.toggle('hidden', mode !== 'auto');
+            document.getElementById('groupCountInput')?.closest('div')?.classList.toggle('hidden', mode === 'auto');
+            document.getElementById('matchCountInput')?.closest('div')?.classList.toggle('hidden', mode === 'auto');
+            document.getElementById('qualifyCountInput')?.closest('div')?.classList.toggle('hidden', mode === 'auto');
+            updateAutoRuleText();
         }
 
         function getPlayerList() {
@@ -443,6 +462,47 @@
             }
             return document.getElementById('playerListInput').value
                 .split(/[\n,]+/).map(name => name.trim()).filter(Boolean);
+        }
+
+        function getAutoRoundConfigs(count) {
+            const presets = {
+                4:[{groups:1,size:4,matches:9,qualify:4,final:true,label:'CHUNG KẾT'}],
+                6:[{groups:2,size:3,matches:7,qualify:2,label:'VÒNG 1'},{groups:1,size:4,matches:9,qualify:4,final:true,label:'CHUNG KẾT'}],
+                8:[{groups:2,size:4,matches:7,qualify:3,label:'VÒNG 1'},{groups:2,size:3,matches:7,qualify:2,label:'VÒNG 2'},{groups:1,size:4,matches:9,qualify:4,final:true,label:'CHUNG KẾT'}],
+                9:[{groups:3,size:3,matches:7,qualify:2,label:'VÒNG 1'},{groups:2,size:3,matches:7,qualify:2,label:'VÒNG 2'},{groups:1,size:4,matches:9,qualify:4,final:true,label:'CHUNG KẾT'}],
+                12:[{groups:3,size:4,matches:7,qualify:3,label:'VÒNG 1'},{groups:3,size:3,matches:7,qualify:2,label:'VÒNG 2'},{groups:2,size:3,matches:7,qualify:2,label:'VÒNG 3'},{groups:1,size:4,matches:9,qualify:4,final:true,label:'CHUNG KẾT'}],
+                16:[{groups:4,size:4,matches:7,qualify:3,label:'VÒNG 1'},{groups:3,size:4,matches:7,qualify:3,label:'VÒNG 2'},{groups:3,size:3,matches:7,qualify:2,label:'VÒNG 3'},{groups:2,size:3,matches:7,qualify:2,label:'VÒNG 4'},{groups:1,size:4,matches:9,qualify:4,final:true,label:'CHUNG KẾT'}]
+            };
+            return presets[Number(count)] || null;
+        }
+        function updateAutoRuleText() {
+            const el=document.getElementById('autoRuleText'); if(!el || currentMode!=='auto') return;
+            const n=Number(document.getElementById('playerCountInput')?.value)||16, cfg=getAutoRoundConfigs(n);
+            el.innerHTML=cfg ? cfg.map((r,i)=>`${i+1}. <b>${r.label}</b>: ${r.groups} bảng × ${r.size} người · BO${r.matches}${r.final?'':' · loại 1/bảng → còn '+(r.groups*r.qualify)+' người'}`).join('<br>') : '<span class="text-yellow-300">Hỗ trợ tự động: 4, 6, 8, 9, 12, 16 tuyển thủ.</span>';
+        }
+        function shufflePlayers(players){ const a=[...players]; for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+        function buildAutoRound(players, cfg, roundIndex){
+            const shuffled=shufflePlayers(players.map(p=>typeof p==='string'?p:p.name));
+            tournamentData=Array.from({length:cfg.groups},(_,g)=>({name:cfg.final?'CHUNG KẾT':`Bảng ${String.fromCharCode(65+g)}`,matches:[],players:[]}));
+            shuffled.forEach((name,i)=>tournamentData[i%cfg.groups].players.push({name,rank:null,points:0,result:null,vehicleIndex:null,petIndex:null}));
+            tournamentData.forEach(g=>g.matches=createMatches(cfg.matches,g.players.length));
+            qualifyCount=cfg.qualify; tournamentMeta.roundIndex=roundIndex; tournamentMeta.final=!!cfg.final;
+            document.getElementById('qualifyCountInput').value=cfg.qualify;
+        }
+        function advanceToNextRound(){
+            if(!tournamentMeta.auto) return showToast('Đang ở chế độ thủ công.','error');
+            const cfg=tournamentMeta.roundConfigs[tournamentMeta.roundIndex]; if(!cfg||cfg.final) return showToast('Đây đã là chung kết.','error');
+            calculateResults();
+            const qualified=[]; const q=cfg.qualify;
+            tournamentData.forEach(g=>{const ranked=g.players.map((p,i)=>({...p,_i:i,points:totalPlayerPoints(g,i)})).sort((a,b)=>(b.points-a.points)||(a._i-b._i)); qualified.push(...ranked.slice(0,q).map(p=>({name:p.name})));});
+            const nextIndex=tournamentMeta.roundIndex+1, next=tournamentMeta.roundConfigs[nextIndex];
+            tournamentMeta.history[tournamentMeta.roundIndex]=JSON.parse(JSON.stringify(tournamentData));
+            buildAutoRound(qualified,next,nextIndex); saveToLocalStorage(); renderGroups();
+        }
+        function showPreviousRound(index){
+            const i=Number.isInteger(index)?index:Math.max(0,tournamentMeta.roundIndex-1);
+            if(!tournamentMeta.history?.[i]) return showToast('Chưa có vòng cũ để xem.','error');
+            tournamentData=JSON.parse(JSON.stringify(tournamentMeta.history[i])); renderGroups();
         }
 
         function getDefaultMatchCount() {
@@ -639,58 +699,21 @@
         }
 
         function triggerRandomDraw() {
-            const players = getPlayerList();
-            const groupCount = Math.max(1, Math.min(26, parseInt(document.getElementById('groupCountInput').value, 10) || 4));
-            qualifyCount = Math.max(1, parseInt(document.getElementById('qualifyCountInput').value, 10) || 2);
-            const matchCount = getDefaultMatchCount();
-
-            if (players.length < groupCount) {
-                showToast('Số lượng người chơi phải lớn hơn hoặc bằng số bảng đấu!', 'error');
-                return;
+            const players=getPlayerList();
+            if(currentMode==='auto'){
+                const cfg=getAutoRoundConfigs(players.length);
+                if(!cfg) return showToast('Tự động hỗ trợ 4, 6, 8, 9, 12 hoặc 16 tuyển thủ.','error');
+                tournamentMeta={auto:true,initialPlayerCount:players.length,roundIndex:0,roundConfigs:cfg,history:[],final:false};
+                buildAutoRound(players,cfg[0],0); updateAutoRuleText(); saveToLocalStorage(); renderGroups();
+                return showToast(`Đã tự chia: ${cfg[0].groups} bảng × ${cfg[0].size} người · BO${cfg[0].matches}.`,'success');
             }
-
-            const drawBtn = document.getElementById('drawBtn');
-            const grid = document.getElementById('groupsGrid');
-            drawBtn.disabled = true;
-            drawBtn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> ĐANG XÁO TRỘN...`;
-            grid.classList.add('shuffling');
-
-            setTimeout(() => {
-                const shuffled = [...players];
-                for (let i = shuffled.length - 1; i > 0; i--) {
-                    const j = Math.floor(Math.random() * (i + 1));
-                    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-                }
-
-                tournamentData = Array.from({ length: groupCount }, (_, g) => ({
-                    name: `Bảng ${String.fromCharCode(65 + g)}`,
-                    matches: [],
-                    players: []
-                }));
-
-                shuffled.forEach((playerName, index) => {
-                    const g = index % groupCount;
-                    tournamentData[g].players.push({
-                        name: playerName,
-                        rank: null,
-                        points: 0,
-                        result: null,
-                        vehicleIndex: null,
-                        petIndex: null
-                    });
-                });
-
-                tournamentData.forEach(group => {
-                    group.matches = createMatches(matchCount, group.players.length);
-                });
-
-                renderGroups();
-                saveToLocalStorage();
-                grid.classList.remove('shuffling');
-                drawBtn.disabled = false;
-                drawBtn.innerHTML = `<i class="fa-solid fa-shuffle"></i> CHIA BẢNG NGẪU NHIÊN`;
-                showToast('Đã chia bảng và tạo các trận đấu!', 'success');
-            }, 400);
+            const groupCount=Math.max(1,Math.min(26,parseInt(document.getElementById('groupCountInput').value,10)||4));
+            qualifyCount=Math.max(1,parseInt(document.getElementById('qualifyCountInput').value,10)||2);
+            const matchCount=getDefaultMatchCount(); if(players.length<groupCount) return showToast('Số người phải >= số bảng.','error');
+            tournamentMeta={auto:false,initialPlayerCount:players.length,roundIndex:0,roundConfigs:[],history:[],final:false};
+            const shuffled=shufflePlayers(players); tournamentData=Array.from({length:groupCount},(_,g)=>({name:`Bảng ${String.fromCharCode(65+g)}`,matches:[],players:[]}));
+            shuffled.forEach((name,i)=>tournamentData[i%groupCount].players.push({name,rank:null,points:0,result:null,vehicleIndex:null,petIndex:null}));
+            tournamentData.forEach(g=>g.matches=createMatches(matchCount,g.players.length)); saveToLocalStorage(); renderGroups();
         }
 
         function ensureGroupMatches(group) {
@@ -736,6 +759,12 @@
             });
 
             const grid = document.getElementById('groupsGrid');
+            const cfg=tournamentMeta.roundConfigs?.[tournamentMeta.roundIndex];
+            const badge=document.getElementById('currentRoundBadge'), info=document.getElementById('currentRoundInfo'), next=document.getElementById('nextRoundBtn'), hist=document.getElementById('roundHistoryButtons');
+            if(badge) badge.textContent=cfg?(cfg.final?'CHUNG KẾT':`VÒNG ${tournamentMeta.roundIndex+1}`):'VÒNG HIỆN TẠI';
+            if(info) info.textContent=cfg?`${cfg.groups} bảng × ${cfg.size} người · BO${cfg.matches}`:'';
+            if(next) next.style.display=(tournamentMeta.auto&&cfg&&!cfg.final)?'':'none';
+            if(hist){hist.innerHTML='';(tournamentMeta.history||[]).forEach((_,i)=>{const b=document.createElement('button');b.className='px-2 py-1 rounded-md bg-gray-900 text-[10px] font-bold text-gray-300 border border-gray-700';b.textContent=`VÒNG ${i+1}`;b.onclick=()=>showPreviousRound(i);hist.appendChild(b);});const b=document.createElement('button');b.className='px-2 py-1 rounded-md bg-cyan-500/10 text-[10px] font-bold text-cyan-300 border border-cyan-500/30';b.textContent='HIỆN TẠI';b.onclick=()=>{if(tournamentMeta.history?.length && tournamentMeta.roundIndex>0){const cfg2=tournamentMeta.roundConfigs[tournamentMeta.roundIndex]; const qplayers=[]; tournamentMeta.history[tournamentMeta.roundIndex-1]?.forEach(g=>g.players.filter(p=>p.result==='qualified').forEach(p=>qplayers.push(p))); if(qplayers.length===cfg2.groups*cfg2.size) buildAutoRound(qplayers,cfg2,tournamentMeta.roundIndex);} renderGroups();};hist.appendChild(b);}
             // Keep opened match-detail panels open after re-rendering.
             const openDetails = new Set(
                 [...grid.querySelectorAll('details.matches-details[open]')]
@@ -1227,7 +1256,7 @@
 
         function saveToLocalStorage() {
             const state = {
-                currentMode, qualifyCount, tournamentData,
+                currentMode, qualifyCount, tournamentData, tournamentMeta,
                 playerCount: document.getElementById('playerCountInput').value,
                 groupCount: document.getElementById('groupCountInput').value,
                 matchCount: document.getElementById('matchCountInput').value,
@@ -1243,6 +1272,7 @@
                 const state = JSON.parse(saved);
                 currentMode = state.currentMode || 'auto';
                 qualifyCount = state.qualifyCount || 3;
+                tournamentMeta = state.tournamentMeta || tournamentMeta;
                 tournamentData = Array.isArray(state.tournamentData) ? state.tournamentData : [];
                 tournamentData.forEach((group, index) => {
                     if (!group.name) group.name = `Bảng ${index + 1}`;
