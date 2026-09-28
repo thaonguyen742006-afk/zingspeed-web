@@ -251,6 +251,16 @@
                         </div>
                     </div>
 
+                    <!-- Match Format -->
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-gray-300 mb-2">THỂ THỨC ĐUA</label>
+                        <div class="grid grid-cols-2 gap-2 p-1 bg-black/40 rounded-xl border border-gray-800">
+                            <button type="button" id="formatSoloBtn" onclick="switchRaceFormat('solo')" class="py-2 rounded-lg text-sm font-bold transition-all bg-purple-600 text-white shadow-md">🏁 SOLO</button>
+                            <button type="button" id="format2v2Btn" onclick="switchRaceFormat('2v2')" class="py-2 rounded-lg text-sm font-bold text-gray-400 hover:text-white transition-all">👥 2 VS 2</button>
+                        </div>
+                        <p id="formatRuleText" class="text-[11px] text-gray-400 mt-1">SOLO: luật chia vòng theo số tuyển thủ.</p>
+                    </div>
+
                     <!-- Auto Players Count -->
                     <div id="autoInputSection">
                         <label for="playerCountInput" class="block text-xs font-bold uppercase tracking-wider text-gray-300 mb-1">Số lượng Tuyển Thủ</label>
@@ -430,6 +440,59 @@
             await loadSheetData(false);
             document.getElementById('playerCountInput')?.addEventListener('input', updateAutoRuleText);
         });
+
+        let raceFormat = 'solo';
+
+        function switchRaceFormat(format) {
+            raceFormat = format === '2v2' ? '2v2' : 'solo';
+            const solo = document.getElementById('formatSoloBtn');
+            const two = document.getElementById('format2v2Btn');
+            const text = document.getElementById('formatRuleText');
+            if (raceFormat === '2v2') {
+                solo.className = 'py-2 rounded-lg text-sm font-bold text-gray-400 hover:text-white transition-all';
+                two.className = 'py-2 rounded-lg text-sm font-bold transition-all bg-purple-600 text-white shadow-md';
+                document.getElementById('playerCountInput').value = 2;
+                text.textContent = '2 VS 2: 2 tuyển thủ → mỗi người 1 đội → BO9.';
+            } else {
+                two.className = 'py-2 rounded-lg text-sm font-bold text-gray-400 hover:text-white transition-all';
+                solo.className = 'py-2 rounded-lg text-sm font-bold transition-all bg-purple-600 text-white shadow-md';
+                text.textContent = 'SOLO: luật chia vòng theo số tuyển thủ.';
+            }
+            updateAutoRuleText();
+        }
+
+        function get2v2Players() {
+            const players = getPlayerList();
+            if (players.length !== 2) {
+                showToast('Chế độ 2 VS 2 cần đúng 2 tuyển thủ.', 'error');
+                return null;
+            }
+            return shufflePlayers(players);
+        }
+
+        function start2v2Match(players) {
+            const shuffled = shufflePlayers(players);
+            const teamA = shuffled.slice(0,1).map(name => ({name, team:'ĐỘI A'}));
+            const teamB = shuffled.slice(1,2).map(name => ({name, team:'ĐỘI B'}));
+            tournamentData = [{
+                name: '2 VS 2 · BO9',
+                is2v2: true,
+                teams: { A: teamA, B: teamB },
+                matches: createMatches(9, 2),
+                players: [...teamA, ...teamB].map(p => ({name:p.name, team:p.team, rank:null, points:0, result:null, vehicleIndex:null, petIndex:null}))
+            }];
+            autoTournament = false;
+            tournamentRounds = [{round:1,label:'2 VS 2 · BO9',final:true,plan:{groups:1,size:2,matches:9,final:true},groups:deepClone(tournamentData)}];
+            activeRoundIndex = 0;
+            viewingRoundIndex = null;
+            document.getElementById('playerCountInput').value = 4;
+            document.getElementById('matchCountInput').value = 9;
+            document.getElementById('qualifyCountInput').value = 2;
+            renderGroups();
+            updateRoundNavigator();
+            saveToLocalStorage();
+            showToast('Đã tạo trận 2 VS 2 · BO9!', 'success');
+        }
 
         function switchInputMode(mode) {
             currentMode = mode;
@@ -1241,6 +1304,7 @@
                 playerCount: document.getElementById('playerCountInput').value,
                 groupCount: document.getElementById('groupCountInput').value,
                 matchCount: document.getElementById('matchCountInput').value,
+                raceFormat,
                 playerListText: document.getElementById('playerListInput').value
             };
             localStorage.setItem('zsm_tournament_state', JSON.stringify(state));
@@ -1436,7 +1500,7 @@
                 groupCount: document.getElementById('groupCountInput').value,
                 matchCount: document.getElementById('matchCountInput').value,
                 playerListText: document.getElementById('playerListInput').value,
-                autoTournament, activeRoundIndex, tournamentRounds
+                autoTournament, activeRoundIndex, tournamentRounds, raceFormat
             };
             localStorage.setItem('zsm_tournament_state', JSON.stringify(base));
         }
@@ -1470,6 +1534,11 @@
         // Override the old manual draw with automatic elimination for 4/6/8/9/12/16 players.
         const legacyTriggerRandomDraw = window.triggerRandomDraw;
         window.triggerRandomDraw = function() {
+            if (raceFormat === '2v2') {
+                const players = get2v2Players();
+                if (players) start2v2Match(players);
+                return;
+            }
             const players = getPlayerList();
             if (getAutoRoundPlan(players.length)) {
                 const ok = startAutomaticTournament(players);
