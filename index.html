@@ -255,10 +255,10 @@
                     <div>
                         <label class="block text-xs font-bold uppercase tracking-wider text-gray-300 mb-2">THỂ THỨC ĐUA</label>
                         <div class="grid grid-cols-2 gap-2 p-1 bg-black/40 rounded-xl border border-gray-800">
-                            <button type="button" id="formatSoloBtn" onclick="switchRaceFormat('default')" class="py-2 rounded-lg text-sm font-bold transition-all bg-purple-600 text-white shadow-md">⚙️ MẶC ĐỊNH</button>
-                            <button type="button" id="format2v2Btn" onclick="switchRaceFormat('custom')" class="py-2 rounded-lg text-sm font-bold text-gray-400 hover:text-white transition-all">🛠️ TÙY CHỈNH</button>
+                            <button type="button" id="formatSoloBtn" onclick="switchRaceFormat('default')" class="py-2 rounded-lg text-sm font-bold transition-all bg-purple-600 text-white shadow-md">🏁 MẶC ĐỊNH</button>
+                            <button type="button" id="format2v2Btn" onclick="switchRaceFormat('custom')" class="py-2 rounded-lg text-sm font-bold text-gray-400 hover:text-white transition-all">⚙️ TÙY CHỈNH</button>
                         </div>
-                        <p id="formatRuleText" class="text-[11px] text-gray-400 mt-1">MẶC ĐỊNH: 2 tuyển thủ → BO9; 4/6/8/9/12/16 tuyển thủ → luật chia vòng tự động.</p>
+                        <p id="formatRuleText" class="text-[11px] text-gray-400 mt-1">MẶC ĐỊNH: luật chia vòng theo số tuyển thủ.</p>
                     </div>
 
                     <!-- Auto Players Count -->
@@ -448,57 +448,29 @@
             const def = document.getElementById('formatSoloBtn');
             const custom = document.getElementById('format2v2Btn');
             const text = document.getElementById('formatRuleText');
+            const groupWrap = document.getElementById('groupCountInput')?.closest('div');
+            const matchWrap = document.getElementById('matchCountInput')?.closest('div');
+            const qualifyWrap = document.getElementById('qualifyCountInput')?.closest('div');
+            const manualSection = document.getElementById('manualInputSection');
+
             if (raceFormat === 'custom') {
                 def.className = 'py-2 rounded-lg text-sm font-bold text-gray-400 hover:text-white transition-all';
                 custom.className = 'py-2 rounded-lg text-sm font-bold transition-all bg-purple-600 text-white shadow-md';
-                text.textContent = 'TÙY CHỈNH: tự chọn số tuyển thủ, số bảng và số trận mỗi bảng.';
+                text.textContent = 'TÙY CHỈNH: tự do chỉnh số tuyển thủ, số bảng và số trận.';
+                // Tùy chỉnh vẫn dùng số lượng tuyển thủ bằng ô số, nhưng mở các cấu hình bảng/trận.
+                currentMode = 'auto';
+                document.getElementById('autoInputSection')?.classList.remove('hidden');
+                manualSection?.classList.add('hidden');
+                groupWrap?.classList.remove('hidden');
+                matchWrap?.classList.remove('hidden');
+                qualifyWrap?.classList.remove('hidden');
             } else {
                 custom.className = 'py-2 rounded-lg text-sm font-bold text-gray-400 hover:text-white transition-all';
                 def.className = 'py-2 rounded-lg text-sm font-bold transition-all bg-purple-600 text-white shadow-md';
-                text.textContent = 'MẶC ĐỊNH: 2 tuyển thủ → BO9; 4/6/8/9/12/16 tuyển thủ → luật chia vòng tự động.';
+                text.textContent = 'MẶC ĐỊNH: luật chia vòng theo số tuyển thủ.';
+                switchInputMode('auto');
             }
-            // Ở MẶC ĐỊNH + TỰ ĐỘNG, bảng và số trận được khóa theo preset.
-            // Ở TÙY CHỈNH, người dùng được tự do chỉnh các thông số này.
-            const lockPreset = raceFormat === 'default' && currentMode === 'auto';
-            document.getElementById('groupCountInput')?.closest('div')?.classList.toggle('hidden', lockPreset);
-            document.getElementById('matchCountInput')?.closest('div')?.classList.toggle('hidden', lockPreset);
-            document.getElementById('qualifyCountInput')?.closest('div')?.classList.toggle('hidden', lockPreset);
-            document.getElementById('autoTournamentRules')?.classList.toggle('hidden', raceFormat !== 'default' || currentMode !== 'auto');
             updateAutoRuleText();
-            saveToLocalStorage();
-        }
-
-        function get2v2Players() {
-            const players = getPlayerList();
-            if (players.length !== 2) {
-                showToast('Chế độ 2 VS 2 cần đúng 2 tuyển thủ.', 'error');
-                return null;
-            }
-            return shufflePlayers(players);
-        }
-
-        function start2v2Match(players) {
-            const shuffled = shufflePlayers(players);
-            const teamA = shuffled.slice(0,1).map(name => ({name, team:'ĐỘI A'}));
-            const teamB = shuffled.slice(1,2).map(name => ({name, team:'ĐỘI B'}));
-            tournamentData = [{
-                name: '2 VS 2 · BO9',
-                is2v2: true,
-                teams: { A: teamA, B: teamB },
-                matches: createMatches(9, 2),
-                players: [...teamA, ...teamB].map(p => ({name:p.name, team:p.team, rank:null, points:0, result:null, vehicleIndex:null, petIndex:null}))
-            }];
-            autoTournament = false;
-            tournamentRounds = [{round:1,label:'2 VS 2 · BO9',final:true,plan:{groups:1,size:2,matches:9,final:true},groups:deepClone(tournamentData)}];
-            activeRoundIndex = 0;
-            viewingRoundIndex = null;
-            document.getElementById('playerCountInput').value = 4;
-            document.getElementById('matchCountInput').value = 9;
-            document.getElementById('qualifyCountInput').value = 2;
-            renderGroups();
-            updateRoundNavigator();
-            saveToLocalStorage();
-            showToast('Đã tạo trận 2 VS 2 · BO9!', 'success');
         }
 
         function switchInputMode(mode) {
@@ -518,16 +490,15 @@
                 manualSection.classList.remove('hidden');
                 autoSection.classList.add('hidden');
             }
-            document.getElementById('autoTournamentRules')?.classList.toggle('hidden', mode !== 'auto' || raceFormat !== 'default');
-            const lockPreset = mode === 'auto' && raceFormat === 'default';
-            document.getElementById('groupCountInput')?.closest('div')?.classList.toggle('hidden', lockPreset);
-            document.getElementById('matchCountInput')?.closest('div')?.classList.toggle('hidden', lockPreset);
-            document.getElementById('qualifyCountInput')?.closest('div')?.classList.toggle('hidden', lockPreset);
+            document.getElementById('autoTournamentRules')?.classList.toggle('hidden', mode !== 'auto');
+            document.getElementById('groupCountInput')?.closest('div')?.classList.toggle('hidden', mode === 'auto');
+            document.getElementById('matchCountInput')?.closest('div')?.classList.toggle('hidden', mode === 'auto');
+            document.getElementById('qualifyCountInput')?.closest('div')?.classList.toggle('hidden', mode === 'auto');
             updateAutoRuleText();
         }
 
         function getPlayerList() {
-            if (currentMode === 'auto') {
+            if (currentMode === 'auto' || raceFormat === 'custom') {
                 const count = Math.max(2, Math.min(256, parseInt(document.getElementById('playerCountInput').value, 10) || 16));
                 return Array.from({ length: count }, (_, i) => `Tuyển thủ ${i + 1}`);
             }
@@ -537,20 +508,26 @@
 
         function getAutoRoundConfigs(count) {
             const presets = {
-                2:[{groups:1,size:2,matches:9,qualify:2,final:true,label:'CHUNG KẾT'}],
+                2:[{groups:1,size:2,matches:9,qualify:2,final:true,label:'CHUNG KẾT · 2 NGƯỜI · BO9'}],
+                3:[{groups:1,size:3,matches:9,qualify:3,final:true,label:'CHUNG KẾT · 3 NGƯỜI · BO9'}],
                 4:[{groups:1,size:4,matches:9,qualify:4,final:true,label:'CHUNG KẾT'}],
                 6:[{groups:2,size:3,matches:7,qualify:2,label:'VÒNG 1'},{groups:1,size:4,matches:9,qualify:4,final:true,label:'CHUNG KẾT'}],
                 8:[{groups:2,size:4,matches:7,qualify:3,label:'VÒNG 1'},{groups:2,size:3,matches:7,qualify:2,label:'VÒNG 2'},{groups:1,size:4,matches:9,qualify:4,final:true,label:'CHUNG KẾT'}],
                 9:[{groups:3,size:3,matches:7,qualify:2,label:'VÒNG 1'},{groups:2,size:3,matches:7,qualify:2,label:'VÒNG 2'},{groups:1,size:4,matches:9,qualify:4,final:true,label:'CHUNG KẾT'}],
                 12:[{groups:3,size:4,matches:7,qualify:3,label:'VÒNG 1'},{groups:3,size:3,matches:7,qualify:2,label:'VÒNG 2'},{groups:2,size:3,matches:7,qualify:2,label:'VÒNG 3'},{groups:1,size:4,matches:9,qualify:4,final:true,label:'CHUNG KẾT'}],
-                16:[{groups:4,size:4,matches:7,qualify:3,label:'VÒNG 1'},{groups:3,size:4,matches:7,qualify:3,label:'VÒNG 2'},{groups:3,size:3,matches:7,qualify:2,label:'VÒNG 3'},{groups:2,size:3,matches:7,qualify:2,label:'VÒNG 4'},{groups:1,size:4,matches:9,qualify:4,final:true,label:'CHUNG KẾT'}]
+                16:[{groups:4,size:4,matches:7,qualify:3,label:'VÒNG 1'},{groups:3,size:4,matches:7,qualify:3,label:'VÒNG 2'},{groups:3,size:3,matches:7,qualify:2,label:'VÒNG 3'},{groups:2,size:3,matches:7,qualify:2,label:'VÒNG 4'},{groups:1,size:4,matches:9,qualify:4,final:true,label:'CHUNG KẾT'}],
+                18:[{groups:6,size:3,matches:5,qualify:2,label:'VÒNG 1 · 6 BẢNG · BO5'},{groups:3,size:4,matches:7,qualify:3,label:'VÒNG 2'},{groups:3,size:3,matches:7,qualify:2,label:'VÒNG 3'},{groups:2,size:3,matches:7,qualify:2,label:'VÒNG 4'},{groups:1,size:4,matches:9,qualify:4,final:true,label:'CHUNG KẾT'}]
             };
             return presets[Number(count)] || null;
         }
         function updateAutoRuleText() {
             const el=document.getElementById('autoRuleText'); if(!el || currentMode!=='auto') return;
+            if (raceFormat === 'custom') {
+                el.innerHTML = '<span class="text-cyan-300">TÙY CHỈNH: tự nhập số tuyển thủ, số bảng và số trận mỗi bảng.</span>';
+                return;
+            }
             const n=Number(document.getElementById('playerCountInput')?.value)||16, cfg=getAutoRoundConfigs(n);
-            el.innerHTML=cfg ? cfg.map((r,i)=>`${i+1}. <b>${r.label}</b>: ${r.groups} bảng × ${r.size} người · BO${r.matches}${r.final?'':' · loại 1/bảng → còn '+(r.groups*r.qualify)+' người'}`).join('<br>') : '<span class="text-yellow-300">Hỗ trợ mặc định: 2, 4, 6, 8, 9, 12, 16 tuyển thủ.</span>';
+            el.innerHTML=cfg ? cfg.map((r,i)=>`${i+1}. <b>${r.label}</b>: ${r.groups} bảng × ${r.size} người · BO${r.matches}${r.final?'':' · loại 1/bảng → còn '+(r.groups*r.qualify)+' người'}`).join('<br>') : '<span class="text-yellow-300">Hỗ trợ mặc định: 2, 3, 4, 6, 8, 9, 12, 16, 18 tuyển thủ.</span>';
         }
         function shufflePlayers(players){ const a=[...players]; for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
         function buildAutoRound(players, cfg, roundIndex){
@@ -1321,7 +1298,7 @@
 
         function loadFromLocalStorage() {
             const saved = localStorage.getItem('zsm_tournament_state');
-            if (!saved) { raceFormat = 'default'; switchInputMode('auto'); switchRaceFormat('default'); return; }
+            if (!saved) { switchInputMode('auto'); return; }
             try {
                 const state = JSON.parse(saved);
                 currentMode = state.currentMode || 'auto';
@@ -1338,9 +1315,7 @@
                 if (state.matchCount) document.getElementById('matchCountInput').value = state.matchCount;
                 if (state.playerListText) document.getElementById('playerListInput').value = state.playerListText;
                 document.getElementById('qualifyCountInput').value = qualifyCount;
-                raceFormat = state.raceFormat === 'custom' ? 'custom' : 'default';
                 switchInputMode(currentMode);
-                switchRaceFormat(raceFormat);
             } catch (e) { console.error('Lỗi load LocalStorage', e); switchInputMode('auto'); }
         }
 
@@ -1351,7 +1326,6 @@
             document.getElementById('matchCountInput').value = 3;
             document.getElementById('qualifyCountInput').value = 3;
             document.getElementById('playerListInput').value = '';
-            switchRaceFormat('default');
             switchInputMode('auto'); triggerRandomDraw();
             showToast('Đã khôi phục cài đặt mặc định!', 'success');
         }
@@ -1397,6 +1371,16 @@
             const plans = {
                 2: [
                     { groups: 1, size: 2, matches: 9, final: true }
+                ],
+                3: [
+                    { groups: 1, size: 3, matches: 9, final: true }
+                ],
+                18: [
+                    { groups: 6, size: 3, matches: 5 },
+                    { groups: 3, size: 4, matches: 7 },
+                    { groups: 3, size: 3, matches: 7 },
+                    { groups: 2, size: 3, matches: 7 },
+                    { groups: 1, size: 4, matches: 9, final: true }
                 ],
                 16: [
                     { groups: 4, size: 4, matches: 7 },
@@ -1546,52 +1530,30 @@
             return true;
         }
 
-        function startCustomTournament(players) {
-            const groupCount = Math.max(1, Math.min(26, parseInt(document.getElementById('groupCountInput').value, 10) || 1));
-            const matchCount = Math.max(1, Math.min(20, parseInt(document.getElementById('matchCountInput').value, 10) || 1));
-            qualifyCount = Math.max(1, parseInt(document.getElementById('qualifyCountInput').value, 10) || 1);
-            if (players.length < groupCount) {
-                showToast('Số tuyển thủ phải >= số bảng.', 'error');
-                return false;
-            }
-            autoTournament = false;
-            tournamentRounds = [];
-            activeRoundIndex = 0;
-            viewingRoundIndex = null;
-            tournamentMeta = { auto: false, initialPlayerCount: players.length, roundIndex: 0, roundConfigs: [], history: [], final: false };
-            const shuffled = shufflePlayers(players);
-            tournamentData = Array.from({ length: groupCount }, (_, g) => ({
-                name: `Bảng ${String.fromCharCode(65 + g)}`, matches: [], players: []
-            }));
-            shuffled.forEach((name, i) => {
-                tournamentData[i % groupCount].players.push({ name, rank: null, points: 0, result: null, vehicleIndex: null, petIndex: null });
-            });
-            tournamentData.forEach(group => group.matches = createMatches(matchCount, group.players.length));
-            saveToLocalStorage();
-            renderGroups();
-            updateRoundNavigator();
-            showToast(`Đã tạo tùy chỉnh: ${players.length} tuyển thủ · ${groupCount} bảng · BO${matchCount}.`, 'success');
-            return true;
-        }
-
-        // MẶC ĐỊNH = preset tự động; TÙY CHỈNH = tự do số người, số bảng, số trận.
+        // Override draw: MẶC ĐỊNH dùng preset; TÙY CHỈNH dùng cấu hình bảng/trận tự nhập.
         const legacyTriggerRandomDraw = window.triggerRandomDraw;
         window.triggerRandomDraw = function() {
             const players = getPlayerList();
             if (raceFormat === 'custom') {
-                startCustomTournament(players);
+                autoTournament = false;
+                tournamentRounds = [];
+                viewingRoundIndex = null;
+                currentMode = 'manual';
+                legacyTriggerRandomDraw();
                 return;
             }
-            const plan = getAutoRoundPlan(players.length);
-            if (plan) {
+            if (getAutoRoundPlan(players.length)) {
                 const ok = startAutomaticTournament(players);
-                if (ok) showToast(players.length === 2 ? 'Đã tạo trận 2 tuyển thủ · BO9.' : `Đã tạo Vòng 1 · ${players.length} tuyển thủ theo luật mặc định.`, 'success');
+                if (ok) {
+                    const firstPlan = getAutoRoundPlan(players.length)[0];
+                    showToast(`Đã tạo Vòng 1 · ${players.length} tuyển thủ · ${firstPlan.groups} bảng · BO${firstPlan.matches}.`, 'success');
+                }
                 return;
             }
             autoTournament = false;
             tournamentRounds = [];
             viewingRoundIndex = null;
-            showToast('Mặc định hỗ trợ 2, 4, 6, 8, 9, 12 hoặc 16 tuyển thủ. Muốn tự chọn thông số hãy chuyển sang TÙY CHỈNH.', 'error');
+            legacyTriggerRandomDraw();
         };
 
         function rankCurrentGroups() {
