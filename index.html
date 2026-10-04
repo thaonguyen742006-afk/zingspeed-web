@@ -656,7 +656,7 @@
             return `${minutes}:${String(seconds).padStart(2, '0')}:${msText}`;
         }
 
-        function calculateMatchScores(match, playerCount) {
+        function calculateMatchScores(match, playerCount, players = null) {
             if (!Array.isArray(match.times)) match.times = Array.from({ length: playerCount }, () => '');
             if (!Array.isArray(match.dnf)) match.dnf = Array.from({ length: playerCount }, () => false);
             while (match.times.length < playerCount) match.times.push('');
@@ -743,6 +743,19 @@
                 });
             }
 
+            // KING MAP: chỉ áp dụng cho bảng 4 tuyển thủ BO9 (chung kết).
+            // Mỗi tuyển thủ chọn 1 map riêng; nếu đúng map đó và họ về TOP 1
+            // của chính race thì được +1 điểm bonus. Nếu không TOP 1, điểm giữ nguyên.
+            if (playerCount === 4 && match.mapIndex != null && Array.isArray(players)) {
+                const winner = finished.length ? [...finished].sort((a, b) => (a.time - b.time) || (a.index - b.index))[0] : null;
+                if (winner) {
+                    const kingIndex = Number(players[winner.index]?.kingMapIndex);
+                    if (Number.isInteger(kingIndex) && kingIndex === Number(match.mapIndex)) {
+                        scores[winner.index] += 1;
+                    }
+                }
+            }
+
             match.scores = scores;
             return scores;
         }
@@ -804,7 +817,7 @@
             // Luôn tính lại điểm trước khi vẽ giao diện để không dùng scores cũ trong localStorage.
             tournamentData.forEach(group => {
                 ensureGroupMatches(group);
-                group.matches.forEach(match => calculateMatchScores(match, group.players.length));
+                group.matches.forEach(match => calculateMatchScores(match, group.players.length, group.players));
             });
 
             const grid = document.getElementById('groupsGrid');
@@ -971,6 +984,14 @@
                                             : `<div class="text-[10px] text-gray-600">Chưa chọn Pet</div>`}
                                     </div>
                                 </div>
+                                ${group.players.length === 4 && group.matches.length === 9 ? `
+                                <div class="rounded-lg bg-yellow-500/5 border border-yellow-500/20 p-2 sm:col-span-3">
+                                    <div class="text-[9px] uppercase font-bold text-yellow-300 mb-1">👑 KING MAP</div>
+                                    <select class="inventory-select king-map-select" data-group="${gIndex}" data-player="${pIndex}">
+                                        ${inventory.maps.length ? `<option value="">-- Chọn King Map --</option>` + inventory.maps.map((map, i) => `<option value="${i}" ${i === player.kingMapIndex ? 'selected' : ''}>${escapeHtml(map.name)}</option>`).join('') : `<option value="">Chưa có dữ liệu Map</option>`}
+                                    </select>
+                                    <div class="text-[9px] text-gray-500 mt-1">Chọn đúng map này và về TOP 1 → +1 điểm.</div>
+                                </div>` : ''}
                             </div>
                         </div>`;
                 });
@@ -1119,6 +1140,13 @@
                 saveToLocalStorage();
                 renderGroups();
             }));
+
+            grid.querySelectorAll('.king-map-select').forEach(select => select.addEventListener('change', event => {
+                const g = Number(event.target.dataset.group), p = Number(event.target.dataset.player);
+                tournamentData[g].players[p].kingMapIndex = event.target.value === '' ? null : Number(event.target.value);
+                saveToLocalStorage();
+                renderGroups();
+            }));
         }
 
         function calculateResults() {
@@ -1127,7 +1155,7 @@
 
             tournamentData.forEach(group => {
                 ensureGroupMatches(group);
-                group.matches.forEach(match => calculateMatchScores(match, group.players.length));
+                group.matches.forEach(match => calculateMatchScores(match, group.players.length, group.players));
                 group.players.forEach((player, pIndex) => player.points = totalPlayerPoints(group, pIndex));
                 const qualify = Math.min(qualifyCount, group.players.length);
                 group.players = group.players.map((player, originalIndex) => ({ ...player, originalIndex }))
@@ -1559,7 +1587,7 @@
         function rankCurrentGroups() {
             tournamentData.forEach(group => {
                 ensureGroupMatches(group);
-                group.matches.forEach(match => calculateMatchScores(match, group.players.length));
+                group.matches.forEach(match => calculateMatchScores(match, group.players.length, group.players));
 
                 // Lưu điểm theo tuyển thủ trước khi đổi thứ tự.
                 group.players.forEach((player, pIndex) => {
