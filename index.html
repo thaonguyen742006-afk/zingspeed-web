@@ -656,7 +656,7 @@
             return `${minutes}:${String(seconds).padStart(2, '0')}:${msText}`;
         }
 
-        function calculateMatchScores(match, playerCount, players = null) {
+        function calculateMatchScores(match, playerCount, players = null, kingMapPlayerIndex = null) {
             if (!Array.isArray(match.times)) match.times = Array.from({ length: playerCount }, () => '');
             if (!Array.isArray(match.dnf)) match.dnf = Array.from({ length: playerCount }, () => false);
             while (match.times.length < playerCount) match.times.push('');
@@ -744,15 +744,16 @@
             }
 
             // KING MAP: chỉ áp dụng cho bảng 4 tuyển thủ BO9 (chung kết).
-            // Mỗi tuyển thủ chọn 1 map riêng; nếu đúng map đó và họ về TOP 1
-            // của chính race thì được +1 điểm bonus. Nếu không TOP 1, điểm giữ nguyên.
-            if (playerCount === 4 && match.mapIndex != null && Array.isArray(players)) {
-                const winner = finished.length ? [...finished].sort((a, b) => (a.time - b.time) || (a.index - b.index))[0] : null;
-                if (winner) {
-                    const kingIndex = Number(players[winner.index]?.kingMapIndex);
-                    if (Number.isInteger(kingIndex) && kingIndex === Number(match.mapIndex)) {
-                        scores[winner.index] += 1;
-                    }
+            // BTC chọn 1 tuyển thủ trong dropdown KING MAP của bảng.
+            // Nếu đúng tuyển thủ đó về TOP 1 ở bất kỳ map nào -> +1 điểm.
+            // Nếu không TOP 1 -> tính điểm giải đấu như bình thường.
+            if (playerCount === 4 && Array.isArray(players) && players.length === 4) {
+                const winner = finished.length
+                    ? [...finished].sort((a, b) => (a.time - b.time) || (a.index - b.index))[0]
+                    : null;
+                const kingIndex = Number(kingMapPlayerIndex);
+                if (winner && Number.isInteger(kingIndex) && kingIndex === winner.index) {
+                    scores[winner.index] += 1;
                 }
             }
 
@@ -817,7 +818,7 @@
             // Luôn tính lại điểm trước khi vẽ giao diện để không dùng scores cũ trong localStorage.
             tournamentData.forEach(group => {
                 ensureGroupMatches(group);
-                group.matches.forEach(match => calculateMatchScores(match, group.players.length, group.players));
+                group.matches.forEach(match => calculateMatchScores(match, group.players.length, group.players, group.kingMapPlayerIndex));
             });
 
             const grid = document.getElementById('groupsGrid');
@@ -939,62 +940,6 @@
                         </div>`;
                 });
 
-                // Player setup stays separate from the match results.
-                let playerCards = '';
-                group.players.forEach((player, pIndex) => {
-                    const vehicle = Number.isInteger(player.vehicleIndex) ? inventory.vehicles[player.vehicleIndex] : null;
-                    const pet = Number.isInteger(player.petIndex) ? inventory.pets[player.petIndex] : null;
-                    const vehicleOptions = inventory.vehicles.length
-                        ? `<option value="">-- Chọn Xe --</option>` + inventory.vehicles.map((v, i) => `<option value="${i}" ${i === player.vehicleIndex ? 'selected' : ''}>${escapeHtml(v.name)}</option>`).join('')
-                        : `<option value="">Chưa có dữ liệu Xe</option>`;
-                    const petOptions = inventory.pets.length
-                        ? `<option value="">-- Chọn Pet --</option>` + inventory.pets.map((v, i) => `<option value="${i}" ${i === player.petIndex ? 'selected' : ''}>${escapeHtml(v.name)}</option>`).join('')
-                        : `<option value="">Chưa có dữ liệu Pet</option>`;
-
-                    playerCards += `
-                        <div class="rounded-xl border border-gray-800 bg-black/20 p-3">
-                            <div class="flex items-center gap-2 mb-2">
-                                <span class="w-7 h-7 rounded-lg bg-gray-900 border border-gray-700 flex items-center justify-center text-xs font-bold text-gray-300">${pIndex + 1}</span>
-                                <span class="font-bold text-sm text-gray-200 truncate">${escapeHtml(player.name)}</span>
-                            </div>
-                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                                <div class="rounded-lg bg-black/25 border border-gray-800 p-2">
-                                    <div class="text-[9px] uppercase font-bold text-gray-500 mb-1">🏎️ Xe</div>
-                                    <select class="inventory-select vehicle-select" data-group="${gIndex}" data-player="${pIndex}">${vehicleOptions}</select>
-                                    <div class="flex items-center justify-center mt-2 min-h-[72px]">
-                                        ${vehicle?.image
-                                            ? `<img src="${escapeHtml(vehicle.image)}" class="inventory-thumb" onerror="this.style.display='none'" alt="">`
-                                            : `<div class="text-[10px] text-gray-600">Chưa chọn xe</div>`}
-                                    </div>
-                                </div>
-                                <div class="rounded-lg bg-black/25 border border-gray-800 p-2">
-                                    <div class="text-[9px] uppercase font-bold text-gray-500 mb-1">⚙️ ECU</div>
-                                    <div class="flex items-center justify-center mt-2 min-h-[72px]">
-                                        ${vehicle?.ecuImage
-                                            ? `<img src="${escapeHtml(vehicle.ecuImage)}" class="inventory-thumb" onerror="this.style.display='none'" alt="">`
-                                            : `<div class="text-[10px] text-gray-600 text-center">ECU tự theo xe</div>`}
-                                    </div>
-                                </div>
-                                <div class="rounded-lg bg-black/25 border border-gray-800 p-2">
-                                    <div class="text-[9px] uppercase font-bold text-gray-500 mb-1">🐾 Pet</div>
-                                    <select class="inventory-select pet-select" data-group="${gIndex}" data-player="${pIndex}">${petOptions}</select>
-                                    <div class="flex items-center justify-center mt-2 min-h-[72px]">
-                                        ${pet?.image
-                                            ? `<img src="${escapeHtml(pet.image)}" class="inventory-thumb" onerror="this.style.display='none'" alt="">`
-                                            : `<div class="text-[10px] text-gray-600">Chưa chọn Pet</div>`}
-                                    </div>
-                                </div>
-                                ${group.players.length === 4 && group.matches.length === 9 ? `
-                                <div class="rounded-lg bg-yellow-500/5 border border-yellow-500/20 p-2 sm:col-span-3">
-                                    <div class="text-[9px] uppercase font-bold text-yellow-300 mb-1">👑 KING MAP</div>
-                                    <select class="inventory-select king-map-select" data-group="${gIndex}" data-player="${pIndex}">
-                                        ${inventory.maps.length ? `<option value="">-- Chọn King Map --</option>` + inventory.maps.map((map, i) => `<option value="${i}" ${i === player.kingMapIndex ? 'selected' : ''}>${escapeHtml(map.name)}</option>`).join('') : `<option value="">Chưa có dữ liệu Map</option>`}
-                                    </select>
-                                    <div class="text-[9px] text-gray-500 mt-1">Chọn đúng map này và về TOP 1 → +1 điểm.</div>
-                                </div>` : ''}
-                            </div>
-                        </div>`;
-                });
 
                 const detailsKey = `group-${gIndex}-matches`;
                 const detailsOpen = openDetails.has(detailsKey) ? ' open' : '';
@@ -1006,7 +951,15 @@
                                 <i class="fa-solid fa-trophy text-purple-400 shrink-0"></i>
                                 <input type="text" value="${escapeHtml(group.name)}" data-group-name data-group="${gIndex}" aria-label="Tên bảng ${gIndex + 1}" class="group-name-input orbitron font-black text-lg text-white bg-transparent border-b border-transparent hover:border-gray-600 focus:border-purple-400 focus:outline-none px-1 py-0.5 min-w-0 w-full max-w-[280px]">
                             </div>
-                            <div class="flex items-center gap-2">
+                            <div class="flex flex-wrap items-center gap-2 justify-end">
+                                ${group.players.length === 4 && group.matches.length === 9 ? `
+                                <div class="flex items-center gap-1.5 rounded-lg bg-yellow-500/5 border border-yellow-500/20 px-2 py-1.5">
+                                    <span class="text-[9px] uppercase font-black text-yellow-300 whitespace-nowrap">👑 KING MAP</span>
+                                    <select class="inventory-select king-map-player-select max-w-[150px]" data-group="${gIndex}" aria-label="Chọn King Map">
+                                        <option value="">-- Chọn tuyển thủ --</option>
+                                        ${group.players.map((player, i) => `<option value="${i}" ${Number(group.kingMapPlayerIndex) === i ? 'selected' : ''}>${escapeHtml(player.name)}</option>`).join('')}
+                                    </select>
+                                </div>` : ''}
                                 <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-purple-500/10 text-purple-300 border border-purple-500/30">${group.players.length} Tuyển thủ</span>
                                 <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/30">${group.matches.length} Trận</span>
                             </div>
@@ -1041,17 +994,6 @@
                             <div class="px-3 pb-3 space-y-3">${matchesHtml}</div>
                         </details>
 
-                        <!-- PLAYER SETUP -->
-                        <details class="rounded-xl border border-gray-800 bg-black/10">
-                            <summary class="cursor-pointer list-none px-4 py-3 flex items-center justify-between gap-3 hover:bg-white/5 rounded-xl select-none">
-                                <div>
-                                    <div class="text-xs font-black uppercase tracking-wider text-gray-400">🏎️ Cấu hình tuyển thủ</div>
-                                    <div class="text-[10px] text-gray-600">Xe / ECU / Pet</div>
-                                </div>
-                                <i class="fa-solid fa-chevron-down text-gray-600 text-xs"></i>
-                            </summary>
-                            <div class="px-3 pb-3 space-y-2">${playerCards}</div>
-                        </details>
                     </div>
                     <div class="px-4 py-2 bg-black/40 border-t border-gray-800/80 text-[11px] text-gray-500 flex justify-between">
                         <span>Đi tiếp: Top ${groupQualifyCount}</span>
@@ -1076,7 +1018,7 @@
             grid.querySelectorAll('.match-scoring-mode').forEach(select => select.addEventListener('change', event => {
                 const g = Number(event.target.dataset.group), m = Number(event.target.dataset.match);
                 tournamentData[g].matches[m].scoringMode = event.target.value === '1234' ? '1234' : 'tournament';
-                calculateMatchScores(tournamentData[g].matches[m], tournamentData[g].players.length);
+                calculateMatchScores(tournamentData[g].matches[m], tournamentData[g].players.length, tournamentData[g].players, tournamentData[g].kingMapPlayerIndex);
                 tournamentData[g].players.forEach((pl, idx) => {
                     pl.points = totalPlayerPoints(tournamentData[g], idx);
                     pl.rank = null; pl.result = null;
@@ -1111,7 +1053,7 @@
                 }
                 tournamentData[g].matches[m].times[p] = formatted;
                 tournamentData[g].matches[m].dnf[p] = (raw === 'X');
-                calculateMatchScores(tournamentData[g].matches[m], tournamentData[g].players.length);
+                calculateMatchScores(tournamentData[g].matches[m], tournamentData[g].players.length, tournamentData[g].players, tournamentData[g].kingMapPlayerIndex);
                 tournamentData[g].players.forEach((pl, idx) => {
                     pl.points = totalPlayerPoints(tournamentData[g], idx);
                     pl.rank = null; pl.result = null;
@@ -1141,9 +1083,9 @@
                 renderGroups();
             }));
 
-            grid.querySelectorAll('.king-map-select').forEach(select => select.addEventListener('change', event => {
-                const g = Number(event.target.dataset.group), p = Number(event.target.dataset.player);
-                tournamentData[g].players[p].kingMapIndex = event.target.value === '' ? null : Number(event.target.value);
+            grid.querySelectorAll('.king-map-player-select').forEach(select => select.addEventListener('change', event => {
+                const g = Number(event.target.dataset.group);
+                tournamentData[g].kingMapPlayerIndex = event.target.value === '' ? null : Number(event.target.value);
                 saveToLocalStorage();
                 renderGroups();
             }));
@@ -1155,7 +1097,7 @@
 
             tournamentData.forEach(group => {
                 ensureGroupMatches(group);
-                group.matches.forEach(match => calculateMatchScores(match, group.players.length, group.players));
+                group.matches.forEach(match => calculateMatchScores(match, group.players.length, group.players, group.kingMapPlayerIndex));
                 group.players.forEach((player, pIndex) => player.points = totalPlayerPoints(group, pIndex));
                 const qualify = Math.min(qualifyCount, group.players.length);
                 group.players = group.players.map((player, originalIndex) => ({ ...player, originalIndex }))
@@ -1587,7 +1529,7 @@
         function rankCurrentGroups() {
             tournamentData.forEach(group => {
                 ensureGroupMatches(group);
-                group.matches.forEach(match => calculateMatchScores(match, group.players.length, group.players));
+                group.matches.forEach(match => calculateMatchScores(match, group.players.length, group.players, group.kingMapPlayerIndex));
 
                 // Lưu điểm theo tuyển thủ trước khi đổi thứ tự.
                 group.players.forEach((player, pIndex) => {
@@ -1756,4 +1698,53 @@
     </script>
 
 </body>
-</html>
+</html>                    scoreRows = '';
+                    group.players.forEach((player, pIndex) => {
+                        const rawTime = match.times?.[pIndex] || '';
+                        const displayTime = formatRaceTime(rawTime);
+                        const score = Number(match.scores[pIndex]) || 0;
+                        const vehicle = Number.isInteger(player.vehicleIndex) ? inventory.vehicles[player.vehicleIndex] : null;
+                        const pet = Number.isInteger(player.petIndex) ? inventory.pets[player.petIndex] : null;
+                        const vehicleOptions = inventory.vehicles.length
+                            ? `<option value="">Xe</option>` + inventory.vehicles.map((v, i) => `<option value="${i}" ${i === player.vehicleIndex ? 'selected' : ''}>${escapeHtml(v.name)}</option>`).join('')
+                            : `<option value="">Chưa có Xe</option>`;
+                        const petOptions = inventory.pets.length
+                            ? `<option value="">Pet</option>` + inventory.pets.map((v, i) => `<option value="${i}" ${i === player.petIndex ? 'selected' : ''}>${escapeHtml(v.name)}</option>`).join('')
+                            : `<option value="">Chưa có Pet</option>`;
+
+                        scoreRows += `
+                            <div class="grid grid-cols-[minmax(120px,1fr)_minmax(150px,1.25fr)_minmax(130px,1fr)_minmax(120px,1fr)_70px] items-center gap-2 bg-black/30 rounded-lg px-2 py-2 border border-gray-800">
+                                <div class="min-w-0 flex items-center gap-2">
+                                    <span class="text-[10px] text-gray-500 w-5 text-center">${pIndex + 1}</span>
+                                    <span class="text-xs font-semibold text-gray-300 truncate">${escapeHtml(player.name)}</span>
+                                </div>
+
+                                <div class="flex items-center gap-1.5 min-w-0">
+                                    <select class="inventory-select vehicle-select min-w-0 flex-1" data-group="${gIndex}" data-player="${pIndex}" aria-label="Xe ${escapeHtml(player.name)}">${vehicleOptions}</select>
+                                    <div class="w-9 h-9 shrink-0 rounded-md border border-gray-800 bg-black/40 flex items-center justify-center overflow-hidden" title="${escapeHtml(vehicle?.ecuName || 'ECU theo xe')}">
+                                        ${vehicle?.ecuImage
+                                            ? `<img src="${escapeHtml(vehicle.ecuImage)}" class="w-full h-full object-contain" onerror="this.style.display='none'" alt="ECU">`
+                                            : `<span class="text-[9px] text-gray-600">ECU</span>`}
+                                    </div>
+                                </div>
+
+                                <div class="min-w-0">
+                                    <input type="text" inputmode="numeric" value="${escapeHtml(displayTime)}" data-race-time data-group="${gIndex}" data-match="${mIndex}" data-player="${pIndex}" placeholder="Nhập" class="w-full min-w-0 bg-black/60 border border-gray-700 rounded-lg px-2 py-1.5 text-center text-cyan-300 font-bold focus:outline-none focus:border-cyan-400" aria-label="Thời gian ${escapeHtml(player.name)} trận ${mIndex + 1}">
+                                </div>
+
+                                <div class="flex items-center gap-1.5 min-w-0">
+                                    <select class="inventory-select pet-select min-w-0 flex-1" data-group="${gIndex}" data-player="${pIndex}" aria-label="Pet ${escapeHtml(player.name)}">${petOptions}</select>
+                                    <div class="w-9 h-9 shrink-0 rounded-md border border-gray-800 bg-black/40 flex items-center justify-center overflow-hidden">
+                                        ${pet?.image
+                                            ? `<img src="${escapeHtml(pet.image)}" class="w-full h-full object-contain" onerror="this.style.display='none'" alt="Pet">`
+                                            : `<span class="text-[9px] text-gray-600">PET</span>`}
+                                    </div>
+                                </div>
+
+                                <div class="text-right">
+                                    <div class="text-[8px] uppercase text-gray-600">Điểm</div>
+                                    <div class="orbitron font-black ${score < 0 ? 'text-red-300' : 'text-cyan-300'}">${score}</div>
+                                </div>
+                            </div>`;
+                    });
+
