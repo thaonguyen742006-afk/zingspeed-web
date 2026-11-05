@@ -39,7 +39,6 @@
     </script>
 
     <style>
-        /* ===== Fantasy Castle Parallax Background ===== */
         #parallax-bg {
             position: fixed;
             inset: 0;
@@ -82,45 +81,33 @@
         }
 
         body {
-            background-color: #08090d;
+            background-color: #171923 !important;
             background-image: 
-                radial-gradient(circle at 15% 20%, rgba(168, 85, 247, 0.12) 0%, transparent 40%),
-                radial-gradient(circle at 85% 80%, rgba(6, 182, 212, 0.12) 0%, transparent 40%);
-            background-attachment: fixed;
+                radial-gradient(circle at 12% 15%, rgba(255,154,162,.16) 0%, transparent 34%),
+                radial-gradient(circle at 88% 25%, rgba(181,234,215,.13) 0%, transparent 32%),
+                radial-gradient(circle at 75% 90%, rgba(199,206,234,.14) 0%, transparent 36%);
             font-family: 'Rajdhani', sans-serif;
-            color: #f3f4f6;
+            color: #f8f7fb;
         }
 
-        .orbitron { fontFamily: 'Orbitron', sans-serif; }
+        .orbitron { font-family: 'Orbitron', sans-serif; }
 
-        /* Custom Scrollbar */
         ::-webkit-scrollbar {
             width: 8px;
             height: 8px;
         }
-        ::-webkit-scrollbar-track {
-            background: #0b0c10;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #2a2e3d;
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #a855f7;
-        }
+        ::-webkit-scrollbar-track { background: #171923; }
+        ::-webkit-scrollbar-thumb { background: #4b5068; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #FF9AA2; }
 
         .glass-panel {
-            background: rgba(18, 20, 29, 0.75);
+            background: rgba(36, 40, 58, .72) !important;
             backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255,255,255,.10) !important;
         }
 
-        .glow-text-cyan {
-            text-shadow: 0 0 10px rgba(6, 182, 212, 0.7);
-        }
-        .glow-text-purple {
-            text-shadow: 0 0 10px rgba(168, 85, 247, 0.7);
-        }
+        .glow-text-cyan { text-shadow: 0 0 10px rgba(181,234,215,.55) !important; }
+        .glow-text-purple { text-shadow: 0 0 10px rgba(255,154,162,.55) !important; }
 
         @keyframes shufflePulse {
             0% { transform: scale(1); opacity: 1; }
@@ -131,109 +118,55 @@
         .shuffling {
             animation: shufflePulse 0.15s infinite alternate;
         }
-    
-        .inventory-thumb { width: 110px; height: 72px; object-fit: contain; border-radius: 10px; background: rgba(0,0,0,.35); border: 1px solid rgba(75,85,99,.6); }
-        .map-thumb { width: 86px; height: 50px; object-fit: cover; border-radius: 10px; background: rgba(0,0,0,.35); border: 1px solid rgba(75,85,99,.6); }
-        .inventory-select { width: 100%; background: rgba(0,0,0,.45); border: 1px solid rgba(75,85,99,.9); border-radius: 10px; color: white; padding: 8px 10px; font-size: 12px; font-weight: 700; outline: none; }
-        .inventory-select:focus { border-color: #06b6d4; }
-        .matches-details > summary::-webkit-details-marker { display:none; }
-        details > summary { list-style:none; }
 
-        /* ===== Pastel Esports Theme ===== */
-        body {
-            background-color: #171923 !important;
-            background-image:
-                radial-gradient(circle at 12% 15%, rgba(255,154,162,.16) 0%, transparent 34%),
-                radial-gradient(circle at 88% 25%, rgba(181,234,215,.13) 0%, transparent 32%),
-                radial-gradient(circle at 75% 90%, rgba(199,206,234,.14) 0%, transparent 36%);
-            color: #f8f7fb;
-        }
-        .glass-panel {
-            background: rgba(36, 40, 58, .72) !important;
-            border-color: rgba(255,255,255,.10) !important;
-        }
         .bg-purple-600, .bg-purple-500 { background-color: #FF9AA2 !important; }
         .bg-cyan-500, .bg-cyan-400 { background-color: #B5EAD7 !important; }
         .bg-yellow-500 { background-color: #FFD1AC !important; }
-        .bg-red-500 { background-color: #FF9AA2 !important; }
-        .bg-purple-900 { background-color: rgba(255,154,162,.24) !important; }
-        .bg-cyan-900 { background-color: rgba(181,234,215,.20) !important; }
-        .bg-red-900 { background-color: rgba(255,154,162,.20) !important; }
         .text-purple-400, .text-purple-300 { color: #FFB7B2 !important; }
         .text-cyan-400, .text-cyan-300 { color: #B5EAD7 !important; }
-        .text-yellow-500, .text-yellow-400, .text-yellow-300 { color: #FFD1AC !important; }
-        .text-red-400, .text-red-300 { color: #FF9AA2 !important; }
-        .border-purple-500, .border-purple-400 { border-color: #FF9AA2 !important; }
-        .border-cyan-500, .border-cyan-400 { border-color: #B5EAD7 !important; }
-        .border-yellow-500, .border-yellow-400 { border-color: #FFD1AC !important; }
-        .border-red-500 { border-color: #FF9AA2 !important; }
-        .hover\:text-red-400:hover { color: #FF9AA2 !important; }
-        .hover\:text-white:hover { color: #ffffff !important; }
-        .focus\:border-cyan-400:focus { border-color: #B5EAD7 !important; }
+        .text-yellow-400, .text-yellow-300 { color: #FFD1AC !important; }
         .shadow-neon-purple { box-shadow: 0 0 20px rgba(255,154,162,.30) !important; }
         .shadow-neon-cyan { box-shadow: 0 0 20px rgba(181,234,215,.26) !important; }
         .shadow-neon-gold { box-shadow: 0 0 15px rgba(255,209,172,.30) !important; }
-        .glow-text-purple { text-shadow: 0 0 10px rgba(255,154,162,.55) !important; }
-        .glow-text-cyan { text-shadow: 0 0 10px rgba(181,234,215,.55) !important; }
-        .inventory-select:focus { border-color: #B5EAD7 !important; box-shadow: 0 0 0 2px rgba(181,234,215,.12); }
-        .inventory-thumb, .map-thumb { border-color: rgba(255,183,178,.38); background: rgba(23,25,35,.55); }
-        ::-webkit-scrollbar-track { background: #171923; }
-        ::-webkit-scrollbar-thumb { background: #4b5068; }
-        ::-webkit-scrollbar-thumb:hover { background: #FF9AA2; }
-
-        /* Header / logo gradients using the supplied pastel palette */
-        .bg-gradient-to-tr.from-purple-600.to-cyan-500 {
-            background-image: linear-gradient(135deg, #FF9AA2, #B5EAD7) !important;
-        }
-        .bg-gradient-to-r.from-purple-400.via-cyan-400.to-pink-500 {
-            background-image: linear-gradient(90deg, #FF9AA2, #B5EAD7, #C7CEEA) !important;
-        }
-
-        .race-time-input { font-variant-numeric: tabular-nums; letter-spacing: .04em; }
-        .match-scoring-mode { min-width: 250px; }
-</style>
+    </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between selection:bg-purple-500 selection:text-white">
-    <!-- Parallax fantasy background -->
     <div id="parallax-bg" aria-hidden="true">
-        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABooAAAOsCAYAAAB9L+SRAAAQAElEQVR4AXT9B7xt2VXeiX7fWPvckkASQqGCKqjSrSoJgRCNCaYJylmAsgCRMxibZGMaTLYxuGnAAQOmweDXPJIxYJIBY7LBCARIKIEACRRRqFz33nPWeP9vrL3PvaJ/b+71rZHDnGvutffZS7dUD3/+L/VDn/9b/b7P+81+3+f+Zj/4gL38vs/9jX4IeCjyQ5/3W/0wfB/+gt/uK174233lC3+nr3rh/wK/Dx+8DPoH4GX9iBf9weCqF/0hdhD6opf3VS/6o77qhdAX/iE5/rAvx+/h4GEv/oN+GD6DF/9hPxxc/pKX9xUv+ZO+8iWv7Kte8qd7vAr66sGVL3lVX/EJ4BNf1Ve+9NXgNeC1fdUnv64f8Smv66s/9c/66k97fV/9GX/Z13zmX/W1n/WGwXWf/ca+/nPe2DcEn/vXfQO48fP+um/83L85xU0jvxH5DX3D513E9fDXf84biP+rvu6z/6If8Zl/3ld+xp/1FYM/78s/Pdjkqz7rz/qqz3o9+Mu+6rODv+grP+sv+orP/Etw4F/fD8dn8Jmv74cF+DwcXE7+y4m74nP+qoMrPxf6uW/oy6GXQ6/4PGT6ufzz3tiXf/4eX/DXfQW48h/8dV/1RX+z4R++ua/8R2/pq774rX3Vl76tH/Hlb+9rv+Ltfd1XvqOv++p39CO/5l39yK99V1/3te/sa7/mHX3tP3tHX/NVbwdv66u/4q19zZe/pa/+0j2+BDn40rf2dV/+tn7kP35bX/8Vb+sb/unb+sbBW/vmr3xb3/o1f9uP+cZ39Qd+yx39Qd95V3/Id93TH/o99/aHfd+9/aF7fNj/jQ582Pff13//B+7rj/jBc4O//x/P9Ycjfzj6D/3ee/uDv+veftx33t0f8G139qP/5e196ze9u2/++nf22W94Z9/8de/qm7723YObv/b2Pvt1d/QtX39n3/oNd/Zt33jHhm+6vW8Dtw7uIB7E9k3Ywa3fGN+78Lmzwwe3feNd/eh/fnc/6l/e07d9671927fd24/+9vv60d95rt/vX5/vx/zbC/0B/27DY7/rQn8g/OOgB3wQ/AGnun9/oR+3xwdB/zcwPsQ+9l9f6Pf/9gv96H91rh/1LdT6lnv60d8KvuXufj/w6AP+5V192zeDf0HP4FHBN93Zj/qmu/r9/nlwN3TD+3/z3R08Fvo44j8IfPC/urs/5F/d0x8G/v633dMfCT4aPOH/urefBJ7y7ef6aczxmf/2XD+HOXw8PT4XPP+7L/QLTnEe/ny/8HvO9/P//bn++H93rj8WPOdfn+tnfcd9/Uzw9O84109lvZ4K/6Rvv7cf/x0bnvCd0O+8rx8PnvBv7usnUucJ3wX9nnP9lO8718/5oQv9wh897k/5qZP+7J8/6S/65ZP+yt866W/5o5P+nted9A+/ce2feevav/TOtX/t9rV/7661/+Dutf/43u6Xg9+5c+1fePvaP/yGk/6u15z0//knJ/31v3fcX/1bx/2Vvw5+47j/j1877q8CX438NchfB74R+7/4neP+l//zuL/ld4/7W4PfO4Ge9Df/Djl+86S/6n+c9D/5peP+4p877s//qeP+9B877pf+8HG/5D8d9wt+4Hil5" alt="Background">
+        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABooAAAOsCAYAAAB9L+SRAAAQAElEQVR4AXT9B7xt2VXeiX7fWPvckkASQqGCKqjSrSoJgRCNCaYJylmAsgCRMxibZGMaTLYxuGnAAQOmweDXPJIxYJIBY7LBCARIKIEACRRRqFz33nPWeP9vrL3PvaJ/b+71rZHDnGvutffZS7dUD3/+L/VDn/9b/b7P+81+3+f+Zj/4gL38vs/9jX4IeCjyQ5/3W/0wfB/+gt/uK174233lC3+nr3rh/wK/Dx+8DPoH4GX9iBf9weCqF/0hdhD6opf3VS/6o77qhdAX/iE5/rAvx+/h4GEv/oN+GD6DF/9hPxxc/pKX9xUv+ZO+8iWv7Kte8qd7vAr66sGVL3lVX/EJ4BNf1Ve+9NXgNeC1fdUnv64f8Smv66s/9c/66k97fV/9GX/Z13zmX/W1n/WGwXWf/ca+/nPe2DcEn/vXfQO48fP+um/83L85xU0jvxH5DX3D513E9fDXf84biP+rvu6z/6If8Zl/3ld+xp/1FYM/78s/Pdjkqz7rz/qqz3o9+Mu+6rODv+grP+sv+orP/Etw4F/fD8dn8Jmv74cF+DwcXE7+y4m74nP+qoMrPxf6uW/oy6GXQ6/4PGT6ufzz3tiXf/4eX/DXfQW48h/8dV/1RX+z4R++ua/8R2/pq774rX3Vl76tH/Hlb+9rv+Ltfd1XvqOv++p39CO/5l39yK99V1/3te/sa7/mHX3tP3tHX/NVbwdv66u/4q19zZe/pa/+0j2+BDn40rf2dV/+tn7kP35bX/8Vb+sb/unb+sbBW/vmr3xb3/o1f9uP+cZ39Qd+yx39Qd95V3/Id93TH/o99/aHfd+9/aF7fNx/jQ582Pff13//B+7rj/jBc4O//x/P9Ycjfzj6D/3ee/uDv+veftx33t0f8G139qP/5e196ze9u2/++nf22W94Z9/8de/qm7723YObv/b2Pvt1d/QtX39n3/oNd/Zt33jHhm+6vW8Dtw7uIB7E9k3Ywa3fGN+78Lmzwwe3feNd/eh/fnc/6l/e07d9671927fd24/+9vv60d95rt/vX5/vx/zbC/0B/27DY7/rQn8g/OOgB3wQ/AGnun9/oR+3xwdB/zcwPsQ+9l9f6Pf/9gv96H91rh/1LdT6lnv60d8KvuXufj/w6AP+5V192zeDf0HP4FHBN93Zj/qmu/r9/nlwN3TD+3/z3R08Fvo44j8IfPC/urs/5F/d0x8G/v633dMfCT4aPOH/urefBJ7y7ef6aczxmf/2XD+HOXw8PT4XPP+7L/QLTnEe/ny/8HvO9/P//bn++H93rj8WPOdfn+tnfcd9/Uzw9O84109lvZ4K/6Rvv7cf/x0bnvCd0O+8rx8PnvBv7usnUucJ3wX9nnP9lO8718/5oQv9wh897k/5qZP+7J8/6S/65ZP+yt866W/5o5P+nted9A+/ce2feevav/TOtX/t9rV/7661/+Dutf/43u6Xg9+5c+1fePvaP/yGk/6u15z0//knJ/31v3fcX/1bx/2Vvw5+47j/j1877q8CX438NchfB74R+7/4neP+l//zuL/ld4/7W4PfO4Ge9Df/Djl+86S/6n+c9D/5peP+4p877s//qeP+9B877pf+8HG/5D8d9wt+4Hil5" alt="Background">
     </div>
 
     <!-- Header Navigation -->
     <header class="glass-panel border-b sticky top-0 z-40">
-        <div class="max-w-7xl mx-mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
-                <!-- Logo & Brand -->
                 <div class="flex items-center space-x-3">
-                    <img src="data:image/png;base64,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8uLrd3H1eH+r2e/f/31e/b+u5xN8v7/2/6/Ld35O9387xur/+/6ve/2r7lVd/P7d1+f/f7x/f2735d//f11/zWl//S2/q6uv5b/++1/ff21+/8/79Otf//3+7etV+P3v+/n/2/vX1+W/4x3vv62r+v33m/z/3+Pvef06vf6v/7d/rPfv+f768//+s76L3xL5v37v73mvu+e//22r3nO+22/l/3d1j1Tduf33u/+vv8ff46rv077z/vvz7/p7+nvdv88+rB++9dtr//z/zNvf8+/t/d//t39fvV/ft9/+7/m/rP9//ffn1ZXXNfz9+/f7+1Xvd7/z0//d/nN811V/9/vftVb69/72e/zvdN17/0e3/u+m3vU1Zfxj9uVv5//mO2794p1r3637651z313f8+p7q1/bftr3/z/uNvePfvve2rvc+vr//6+/j/vT+e+z91dF/P/cZvd//81fvj9+/b//a//b/ve1f93f773j3767tX6+/9u189zlf79+///e1f+/vv+Xv+e//nNf9z79HjPvev3u+2ve6lW6+/evv+/v8+e8v//9/t3/3d/z2/u6+uW79N/d76/f372/W5f/0d/+/u//zLd//zfv/v82v+/91/ev/77f7n8/+7v/+Ld9+3+6/rvu/9+j33e/+d/9//131+2/eP1/3vdf12/T9r+vf03vN911+X9d7lX3z2a353d93/Nf82v+jvuOer7339/a/j/vv8//rfj073z1z9v1fvPev//u+v+7t//+e4/N71Xf73v/3/7jrv5vf//ff++/05e679/1Pfe++/y/65331f+1+P9t//e//L9d38tWve+/8ff/5n9/r9/fv5//5++t75X/r/7m23u/tffn79W+v7+/z6//+//6/W///f7/3/V7vH1Nfe97vf3vve6e++7z+v+//N31W/evf323e691vv3f5n36v7+9Ld+mH/n1+rv+G//n9vv9/7/5W6pP5Lpve9f9+v3+ev/3ve+/u/+v/v6r6j+/03/f303f8z/7+Nfd7v/r3+vf//3/u73++e8/N+v/+vf471z1r9/v+/v9e/j/+s19//d+//vf61X343/1N/5P1ev47n0/190/39W/tfe2q7+r1+1+vd/r+/v9+u3+Xrf7//37v//f+3f+/p6er73n+//70+/z879/v2/X//Xfv+/v+/u7/7t+53f9392++zX4Nf92/5e79Nvf//7N+e//31+r1+//6v22f+ev7/+fV/3e7/jW8/l/3W+v/t3X/vf4L/rN+//3u/j3/r/v2vd7//6r+/P/V/3d+vf//9W//+v3/Vfvv336r+/V93z7e/W++3/0n9fP5d/+v6/b/7r329++/e3/q1/736+/+m/f/vv+tX6/f6//9t9fv///+t7e1t33Xf/X9+r+P31P1+39v+f0u3v//r+vu1e/z7+Nn/d//z9f3+/v9v2ve72///356/r95vv7f/+ff8/f2++99r7v3u+uX/M///0f/S9Xfevf9//z3n+vr091e9rPz/5v+x/u9ff5e/7n/l/3v17v/s///V++/ff5t/Ff4f133+/7e93///u/+v3/33++/b1/XN/vv/f3+/v87d+/fve///9e33///v//f67f0/t//x93//9e98vfXb9vf6///v5//r5///t/1+/tve+///+q73e/26+///98t/1d+r//u6/X//b+//v96d/3d///e/2v//+r+/v9//e///f6e//vfe++vr+9v//+/f373v9//b997+///P11+l7f03+7/vv+vf13+1/3///v+u3v9W337X5N//7f6/++/1/vd7/H+t///u/f139+3389/j+uX/9+7t/zX/N//fX/+v9vXb/zW0/3f++vf9+e3vf/+vv697/r/9+//d3X//fv7/+fV5/bvd+//0/f5a++v/+7e///b//3/8u/6/a7/+9/X5+rn7P31+/++u97f/+fv5f3+//b0/+3+9/f0++vPffv//r/vf/+9/9+67//7e3//vd7/+u/57/Xf9+v+7t9v+d7+r9+L/d6//1f//f/+r//X/7/X9///x/t963//nvd/+27/3/r/3u/5//3//3+e/9/e7v/r/93/+r36/b/f//+//u///ve05+/99d//v/6Xf4///tef8u///e/12///H9/+fX++/1/7/83vf/3/q+///O3679/+ve9//3e/997+r/+/n+//9v7+z9//vv9///b/u///O//+v//r+///j9++1+Xv9//t59Xvf/X///x/v//+/v9+//0///tXn717t+vf++u9X7X/7/e4///+L3f7/r++vev++p/v7/b//2fvv6+/++ve//t8X//5//+jve63v/f3+//vff/+///f4v/8T3/1+//t0f/r/93///vd9//r/+/b897ve///u+vv1fv8vev1+/j5/X/7r3f//ff+19f//++/XN9ffy7f/d//7/++9b3+v3u/X//739fv4/e9/Xve++/1+//3f78u3vvv1+///P//b93v9b/+f97/fvevv/+v6+/zff1r/vdvv/vev/2rf5v//Pfev3+f9f7v++/P79v88/r/2r713/f/+v7vfv/W7f/t2/fv//tveff91++Xb//+//++/W797vv1b/7r//fX//z//3//d979Lvv697r33/e1vv++/v9ff+tve/t++vd+/P0/+v///d/3/ve++9/W/9Xf3++/6v/+vvX/++rf7v9/X+2++/u1V3vfe+/zX35399v/9+3/e+/v9/35+p37X/7b2rf73v/+uv/+1v9ev//669b//b++///fv1+//vv9ff8e73vv3/r+9t7+/v+//u///r///v/1a+/z+//1Vfe/+36v++/Xff2/+jX3/f/9X/W///a1/d79X351f+u9///+r38n33v89+/+v9ev3vf++/3///b/l6rv+v/+tf7vf99X1/u++/+/e/ff/e9v9f7v37/v1f2/+te/1v71f76///9f/j7f+//j3++/b3/1tX/+v/z99/+///2vv+tvr/+t7f+3vvqfvd39f+r9//r+//98v+r1/9b97/+vd/+uv+/1/d///d9fe/f+ve2++/+/vdvf3+/3e3v++7t3r333f4/+v6/+///2rv+tX7v//u/t9vf6d+l+/u///+//v/7v7fe1b/f+//r/+9f++/rv/d+ev/+1b79+9/f0//Vfve+/ve/+3f/7/f7++/++l+/tVve3///e97r//veuv/+tX/7v2vv5d2rv+1/vff2vv/V1/z/93r++/93ffb+/tf++/r7///d/+9++/vv/3/+tf9b3X+/9b9+d797vf//fv7/+l/f++/d1/z/v0v3e/d+r1//57/+rv96/X9/3vv/+vv/+u36vfe/Xb/Vb++/Xb/d+/++1b//f3t+7/f2+/9Wvv//b//+91/2v++/v9++//vev/rX+7///vfffe79X77v2fvr9v+/v9ff2///v7++33/u3X//zve//39///r///r++n/571W/++1v///u/vev7//7+7/9b33vv/++/v+1f379/1v/V///3/u++/t++ff61fv/v3uv3+/ve/+rf79/r////++/vuvd+3/3+/3f/5/t/+/3f6v77977r/tfv1++r3/v//t+/r9/ev//7v////+19+///d///9b79//r+/tX++/fv///v3t7/vv3u/dfv9a///v//93vv7//f3t/f2/9+//ve7df/9//v//9++/d///f+/ff++3/9/b7v3u73/vv//d/+vv///b+3+9ff/+/X7/++/f++/Xvfe///3rXdfve+///9///7///9b///v3+/v+/9+ve77+uv//e/3//+//f3/++//+/+tVv/d//7/+//v/v/++/d/f/Vf//f/3/7+7+7/+//3r/+//d/+//3b///X+/d///vv///739v+7t+/+///9f//v//v97//fv3+//Xff++/1/+rv/d///X/73/++/v+/d1//+//7/+v+///3fvev////b+/fv//v/Xb/df/+397r///df////+v333++///v////6////fve/1/+rv/+993ff7///vv1/+vv++vv/9b/+tX/r+/t93r+v/r///v3++/X7/3+7vf++1//+39/+f+97/+39+vv+///rf/u1a+9/r/+v/W///df/9///f///r+/b++/X/+1a//v+rfXf++/1//91/+9+//f9++/++/6tf7vf++/933+vv7//rf//+//+/++tf/+te//+1/7Xf9+v///vvvv1f+tv/3fe////r/+/X+/fv++v//V//+//r///vvvv3f///v/+v+/Xb//fe////vfe///d/+tv////ev9////d/1///evff++/d+//tX79Xfe/9d9+//b+/X++/+//ve+1+/vv/vvf6/++/1///++/vv7//9/3//df/+v+t///df/+v9v/Z" alt="STORMYPETREL Logo" class="h-10 w-auto object-contain">
+                    <img src="data:image/png;base64,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8uLrd3H1eH+r2e/f/31e/b+u5xN8v7/2/6/Ld35O9387xur/+/6ve/2r7lVd/P7d1+f/f7x/f2735d//f11/zWl//S2/q6uv5b/++1/ff21+/8/79Otf//3+7etV+P3v+/n/2/vX1+W/4x3vv62r+v33m/z/3+Pvef06vf6v/7d/rPfv+f768//+s76L3xL5v37v73mvu+e//22r3nO+22/l/3d1j1Tduf33u/+vv8ff46rv077z/vvz7/p7+nvdv88+rB++9dtr//z/zNvf8+/t/d//t39fvV/ft9/+7/m/rP9//ffn1ZXXNfz9+/f7+1Xvd7/z0//d/nN811V/9/vftVb69/72e/zvdN17/0e3/u+m3vU1Zfxj9uVv5//mO2794p1r3637651z313f8+p7q1/bftr3/z/uNvePfvve2rvc+vr//6+/j/vT+e+z91dF/P/cZvd//81fvj9+/b//a//b/ve1f93f773j3767tX6+/9u189zlf79+///e1f+/vv+Xv+e//nNf9z79HjPvev3u+2ve6lW6+/evv+/v8+e8v//9/t3/3d/z2/u6+uW79N/d76/f372/W5f/0d/+/u//zLd//zfv/v82v+/91/ev/77f7n8/+7v/+Ld9+3+6/rvu/9+j33e/+d/9//131+2/eP1/3vdf12/T9r+vf03vN911+X9d7lX3z2a353d93/Nf82v+jvuOer7339/a/j/vv8//rfj073z1z9v1fvPev//u+v+7t//+e4/N71Xf73v/3/7jrv5vf//ff++/05e679/1Pfe++/y/65331f+1+P9t//e//L9d38tWve+/8ff/5n9/r9/fv5//5++t75X/r/7m23u/tffn79W+v7+/z6//+//6/W///f7/3/V7vH1Nfe97vf3vve6e++7z+v+//N31W/evf323e691vv3f5n36v7+9Ld+mH/n1+rv+G//n9vv9/7/5W6pP5Lpve9f9+v3+ev/3ve+/u/+v/v6r6j+/03/f303f8z/7+Nfd7v/r3+vf//3/u73++e8/N+v/+vf471z1r9/v+/v9e/j/+s19//d+//vf61X343/1N/5P1ev47n0/190/39W/tfe2q7+r1+1+vd/r+/v9+u3+Xrf7//37v//f+3f+/p6er73n+//70+/z879/v2/X//Xfv+/v+/u+/9/7v+53f9392++zX4Nf92/5e79Nvf//7N+e//31+r1+//6v22f+ev7/+fV/3e7/jW8/l/3W+v/t3X/vf4L/rN+//3u/j3/r/v2vd7//6r+/P/V/3d+vf//9W//+v3/Vfvv336r+/V93z7e/W++3/0n9fP5d/+v6/b/7r329++/e3/q1/736+/+m/f/vv+tX6/f6//9t9fv///+t7e1t33Xf/X9+r+P31P1+39v+f0u3v//r+vu1e/z7+Nn/d//z9f3+/v9v2ve72///356/r95vv7f/+ff8/f2++99r7v3u+uX/M///0f/S9Xfevf9//z3n+vr091e9rPz/5v+x/u9ff5e/7n/l/3v17v/s///V++/ff5t/Ff4f133+/7e93///u/+v3/33++/b1/XN/vv/f3+/v87d+/fve///9e33///v//f67f0/t//x93//9e98vfXb9vf6///v5//r5///t/1+/tve+///+q73e/26+///98t/1d+r//u6/X//b+//v96d/3d///e/2v//+r+/v9//e///f6e//vfe++vr+9v//+/f373v9//b997+///P11+l7f03+7/vv+vf13+1/3///v+u3v9W337X5N//7f6/++/1/vd7/H+t///u/f139+3389/j+uX/9+7t/zX/N//fX/+v9vXb/zW0/3f++vf9+e3vf/+vv697/r/9+//d3X//fv7/+fV5/bvd+//0/f5a++v/+7e///b//3/8u/6/a7/+9/X5+rn7P31+/++u97f/+fv5f3+//b0/+3+9/f0++vPffv//r/vf/+9/9+67//7e3//vd7/+u/57/Xf9+v+7t9v+d7+r9+L/d6//1f//f/+r//X/7/X9///x/t963//nvd/+27/3/r/3u/5//3//3+e/9/e7v/r/93/+r36/b/f//+//u///ve05+/99d//v/6Xf4///tef8u///e/12///H9/+fX++/1/7/83vf/3/q+///O3679/+ve9//3e/997+r/+/n+//9v7+z9//vv9///b/u///O//+v//r+///j9++1+Xv9//t59Xvf/X///x/v//+/v9+//0///tXn717t+vf++u9X7X/7/e4///+L3f7/r++vev++p/v7/b//2fvv6+/++ve//t8X//5//+jve63v/f3+//vff/+///f4v/8T3/1+//t0f/r/93///vd9//r/+/b897ve///u+vv1fv8vev1+/j5/X/7r3f//ff+19f//++/XN9ffy7f/d//7/++9b3+v3u/X//739fv4/e9/Xve++/1+//3f78u3vvv1+///P//b93v9b/+f97/fvevv/+v6+/zff1r/vdvv/vev/2rf5v//Pfev3+f9f7v++/P79v88/r/2r713/f/+v7vfv/W7f/t2/fv//tveff91++Xb//+//++/W797vv1b/7r//fX//z//3//d979Lvv697r33/e1vv++/v9ff+tve/t++vd+/P0/+v///d/3/ve++9/W/9Xf3++/6v/+vvX/++rf7v9/X+2++/u1V3vfe+/zX35399v/9+3/e+/v9/35+p37X/7b2rf73v/+uv/+1v9ev//669b//b++///fv1+//vv9ff8e73vv3/r+9t7+/v+//u///r///v/1a+/z+//1Vfe/+36v++/Xff2/+jX3/f/9X/W///a1/d79X351f+u9///+r38n33v89+/+v9ev3vf++/3///b/l6rv+v/+tf7vf99X1/u++/+/e/ff/e9v9f7v37/v1f2/+te/1v71f76///9f/j7f+//j3++/b3/1tX/+v/z99/+///2vv+tvr/+t7f+3vvqfvd39f+r9//r+//98v+r1/9b97/+vd/+uv+/1/d///d9fe/f+ve2++/+/vdvf3+/3e3v++7t3r333f4/+v6/+///2rv+tX7v//u/t9vf6d+l+/u///+//v/7v7fe1b/f+//r/+9f++/rv/d+ev/+1b79+9/f0//Vfve+/ve/+3f/7/f7++/++l+/tVve3///e97r//veuv/+tX/7v2vv5d2rv+1/vff2vv/V1/z/93r++/93ffb+/tf++/r7///d/+9++/vv/3/+tf9b3X+/9b9+d797vf//fv7/+l/f++/d1/z/v0v3e/d+r1//57/+rv96/X9/3vv/+vv/+u36vfe/Xb/Vb++/Xb/d+/++1b//f3t+7/f2+/9Wvv//b//+91/2v++/v9++//vev/rX+7///vfffe79X77v2fvr9v+/v9ff2///v7++33/u3X//zve//39///r///r++n/571W/++1v///u/vev7//7+7/9b33vv/++/v+1f379/1v/V///3/u++/t++ff61fv/v3uv3+/ve/+rf79/r////++/vuvd+3/3+/3f/5/t/+/3f6v77977r/tfv1++r3/v//t+/r9/ev//7v////+19+///d///9b79//r+/tX++/fv///v3t7/vv3u/dfv9a///v//93vv7//f3t/f2/9+//ve7df/9//v//9++/d///vv///739v+7t+/+///9f//v//v97//fv3+//Xff++/1/+rv/d///X/73/++/v+/d1//+//7/+v+///3fvev////b+/fv//v/Xb/df/+397r///df////+v333++///v////6////fve/1/+rv/+993ff7///vv1/+vv++vv/9b/+tX/r+/t93r+v/r///v3++/X7/3+7vf++1//+39/+f+97/+39+vv+///rf/u1a+9/r/+v/W///df/9///f///r+/b++/X/+1a//v+rfXf++/1//91/+9+//f9++/++/6tf7vf++/933+vv7//rf//+//+/++tf/+te//+1/7Xf9+v///vvvv1f+tv/3fe////r/+/X+/fv++v//V//+//r///vvvv3f///v/+v+/Xb//fe////vfe///d/+tv////ev9////d/1///evff++/d+//tX79Xfe/9d9+//b+/X++/+//ve+1+/vv/vvf6/++/1///++/vv7//9/3//df/+v+t///df/+v9v/Z" alt="STORMYPETREL Logo" class="h-10 w-auto object-contain">
                     <div class="flex flex-col">
                         <span class="orbitron text-xl font-bold tracking-wider text-white">STORMYPETREL</span>
                         <span class="text-xs text-gray-400 font-semibold tracking-widest uppercase glow-text-cyan">BY NEMO</span>
                     </div>
                 </div>
 
-                <!-- Center: Match Info Badge -->
                 <div class="hidden md:flex items-center space-x-2 glass-panel px-4 py-1.5 rounded-full border border-purple-500/30">
                     <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse"></span>
                     <span class="orbitron text-xs font-semibold text-gray-300">TRẬN ĐẤU ĐANG DIỄN RA</span>
                     <span class="text-gray-500">|</span>
-                    <span class="orbitron text-xs text-purple-400 font-bold">VÒNG BẢNG - BẢNG A</span>
+                    <span class="orbitron text-xs text-purple-400 font-bold">VÒNG BẢNG</span>
                 </div>
 
-                <!-- Right Actions -->
                 <div class="flex items-center space-x-3">
                     <button class="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-white/5 transition-all relative">
-                        <i class="fa-solid me-1 fa-bell"></i>
+                        <i class="fa-solid fa-bell"></i>
                         <span class="absolute top-1 right-1 w-2 h-2 bg-purple-500 rounded-full"></span>
                     </button>
                     <button class="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-white/5 transition-all">
-                        <i class="fa-solid me-1 fa-gear"></i>
+                        <i class="fa-solid fa-gear"></i>
                     </button>
                     <div class="h-6 w-px bg-gray-800"></div>
                     <div class="flex items-center space-x-2 cursor-pointer">
                         <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-purple-600 to-cyan-500 p-0.5">
                             <div class="w-full h-full bg-esports-card rounded-[7px] flex items-center justify-center">
-                                <i class="fa-solid me-1 fa-user text-xs text-cyan-400"></i>
+                                <i class="fa-solid fa-user text-xs text-cyan-400"></i>
                             </div>
                         </div>
                         <span class="orbitron text-sm font-semibold hidden sm:inline">ADMIN</span>
@@ -248,9 +181,6 @@
         
         <!-- Tournament Control Header -->
         <div class="glass-panel rounded-2xl p-6 relative overflow-hidden">
-            <div class="absolute -right-10 -bottom-10 w-60 h-60 bg-purple-600/10 rounded-full blur-3xl pointer-events-none"></div>
-            <div class="absolute -left-10 -top-10 w-60 h-60 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
-
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10">
                 <div>
                     <h1 class="orbitron text-2xl md:text-3xl font-black tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-cyan-400 to-pink-500">
@@ -261,62 +191,19 @@
                 
                 <div class="flex flex-wrap items-center gap-3">
                     <button id="btn-shuffle-teams" onclick="shuffleGroupsWithAnimation()" class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-sm tracking-wider shadow-lg shadow-purple-600/20 transition-all flex items-center space-x-2 border border-purple-400/30">
-                        <i class="fa-solid me-1 fa-shuffle"></i>
+                        <i class="fa-solid fa-shuffle"></i>
                         <span>BỐC THĂM TỰ ĐỘNG</span>
                     </button>
 
                     <button onclick="clearScores()" class="px-4 py-2.5 rounded-xl bg-esports-border hover:bg-gray-800 text-gray-300 font-semibold text-sm transition-all flex items-center space-x-2 border border-white/5">
-                        <i class="fa-solid me-1 fa-rotate-left"></i>
+                        <i class="fa-solid fa-rotate-left"></i>
                         <span>RESET ĐIỂM</span>
                     </button>
 
-                    <button class="px-4 py-2.5 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 font-semibold text-sm transition-all flex items-center space-x-2">
-                        <i class="fa-solid me-1 fa-download"></i>
+                    <button onclick="exportScores()" class="px-4 py-2.5 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 font-semibold text-sm transition-all flex items-center space-x-2">
+                        <i class="fa-solid fa-download"></i>
                         <span>XUẤT KQ</span>
                     </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Group Selector & Info Bar -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div class="glass-panel p-4 rounded-xl flex items-center justify-between border-l-4 border-l-purple-500">
-                <div>
-                    <div class="text-xs text-gray-400 uppercase tracking-wider">Tổng Tuyển Thủ</div>
-                    <div class="orbitron text-2xl font-bold text-white mt-0.5">16 / 16</div>
-                </div>
-                <div class="w-10 h-10 rounded-lg bg-purple-500/10 flex items-center justify-center text-purple-400">
-                    <i class="fa-solid me-1 fa-users"></i>
-                </div>
-            </div>
-
-            <div class="glass-panel p-4 rounded-xl flex items-center justify-between border-l-4 border-l-cyan-400">
-                <div>
-                    <div class="text-xs text-gray-400 uppercase tracking-wider">Trận Đấu Hiện Tại</div>
-                    <div class="orbitron text-2xl font-bold text-white mt-0.5">Trận 3 / 5</div>
-                </div>
-                <div class="w-10 h-10 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-400">
-                    <i class="fa-solid me-1 fa-gamepad"></i>
-                </div>
-            </div>
-
-            <div class="glass-panel p-4 rounded-xl flex items-center justify-between border-l-4 border-l-yellow-500">
-                <div>
-                    <div class="text-xs text-gray-400 uppercase tracking-wider">Chế Độ Tính Điểm</div>
-                    <div class="orbitron text-sm font-bold text-yellow-400 mt-1">Chuẩn ZingSpeed</div>
-                </div>
-                <div class="w-10 h-10 rounded-lg bg-yellow-500/10 flex items-center justify-center text-yellow-500">
-                    <i class="fa-solid me-1 fa-trophy"></i>
-                </div>
-            </div>
-
-            <div class="glass-panel p-4 rounded-xl flex items-center justify-between border-l-4 border-l-pink-500">
-                <div>
-                    <div class="text-xs text-gray-400 uppercase tracking-wider">Trạng Thái Bảng</div>
-                    <div class="orbitron text-sm font-bold text-pink-400 mt-1">Đang Thi Đấu</div>
-                </div>
-                <div class="w-10 h-10 rounded-lg bg-pink-500/10 flex items-center justify-center text-pink-400">
-                    <i class="fa-solid me-1 fa-chart-line"></i>
                 </div>
             </div>
         </div>
@@ -326,7 +213,6 @@
             
             <!-- GROUP A -->
             <div class="glass-panel rounded-2xl overflow-hidden border border-purple-500/20 shadow-lg shadow-purple-950/20 group-card" id="group-a-card">
-                <!-- Group Header -->
                 <div class="bg-gradient-to-r from-purple-900/40 to-transparent p-4 border-b border-white/5 flex items-center justify-between">
                     <div class="flex items-center space-x-3">
                         <div class="w-9 h-9 rounded-lg bg-purple-600 flex items-center justify-center text-white font-black orbitron text-lg shadow-neon-purple">
@@ -342,7 +228,6 @@
                     </span>
                 </div>
 
-                <!-- Table Content -->
                 <div class="p-4 overflow-x-auto">
                     <table class="w-full text-left text-sm">
                         <thead>
@@ -358,7 +243,6 @@
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-800/50" id="group-a-body">
-                            <!-- Player 1 -->
                             <tr class="hover:bg-white/5 transition-colors group">
                                 <td class="py-3.5 pl-2 font-bold orbitron text-yellow-400 flex items-center space-x-2">
                                     <span class="w-6 h-6 rounded bg-yellow-500/20 border border-yellow-500/40 flex items-center justify-center text-xs">1</span>
@@ -369,14 +253,13 @@
                                         <span>Storm_Racer</span>
                                     </div>
                                 </td>
-                                <td class="py-3.5 text-center"><input type="number" value="10" min="0" max="10" onchange="updateScores()" class="w-10 text-center bg-black/40 border border-gray-700 rounded py-1 text-xs focus:border-cyan-400 outline-none"></td>
-                                <td class="py-3.5 text-center"><input type="number" value="8" min="0" max="10" onchange="updateScores()" class="w-10 text-center bg-black/40 border border-gray-700 rounded py-1 text-xs focus:border-cyan-400 outline-none"></td>
-                                <td class="py-3.5 text-center"><input type="number" value="10" min="0" max="10" onchange="updateScores()" class="w-10 text-center bg-black/40 border border-gray-700 rounded py-1 text-xs focus:border-cyan-400 outline-none"></td>
-                                <td class="py-3.5 text-center"><input type="number" value="0" min="0" max="10" onchange="updateScores()" class="w-10 text-center bg-black/40 border border-gray-700 rounded py-1 text-xs focus:border-cyan-400 outline-none"></td>
-                                <td class="py-3.5 text-center"><input type="number" value="0" min="0" max="10" onchange="updateScores()" class="w-10 text-center bg-black/40 border border-gray-700 rounded py-1 text-xs focus:border-cyan-400 outline-none"></td>
+                                <td class="py-3.5 text-center"><input type="number" value="10" min="0" max="10" oninput="updateScores()" class="w-10 text-center bg-black/40 border border-gray-700 rounded py-1 text-xs focus:border-cyan-400 outline-none"></td>
+                                <td class="py-3.5 text-center"><input type="number" value="8" min="0" max="10" oninput="updateScores()" class="w-10 text-center bg-black/40 border border-gray-700 rounded py-1 text-xs focus:border-cyan-400 outline-none"></td>
+                                <td class="py-3.5 text-center"><input type="number" value="10" min="0" max="10" oninput="updateScores()" class="w-10 text-center bg-black/40 border border-gray-700 rounded py-1 text-xs focus:border-cyan-400 outline-none"></td>
+                                <td class="py-3.5 text-center"><input type="number" value="0" min="0" max="10" oninput="updateScores()" class="w-10 text-center bg-black/40 border border-gray-700 rounded py-1 text-xs focus:border-cyan-400 outline-none"></td>
+                                <td class="py-3.5 text-center"><input type="number" value="0" min="0" max="10" oninput="updateScores()" class="w-10 text-center bg-black/40 border border-gray-700 rounded py-1 text-xs focus:border-cyan-400 outline-none"></td>
                                 <td class="py-3.5 text-right pr-2 font-black orbitron text-cyan-400 text-base score-total">28</td>
                             </tr>
-                            <!-- Player 2 -->
                             <tr class="hover:bg-white/5 transition-colors group">
                                 <td class="py-3.5 pl-2 font-bold orbitron text-gray-300 flex items-center space-x-2">
                                     <span class="w-6 h-6 rounded bg-gray-400/20 border border-gray-400/40 flex items-center justify-center text-xs">2</span>
@@ -387,14 +270,13 @@
                                         <span>Shadow_King</span>
                                     </div>
                                 </td>
-                                <td class="py-3.5 text-center"><input type="number" value="8" min="0" max="10" onchange="updateScores()" class="w-10 text-center bg-black/40 border border-gray-700 rounded py-1 text-xs focus:border-cyan-400 outline-none"></td>
-                                <td class="py-3.5 text-center"><input type="number" value="10" min="0" max="10" onchange="updateScores()" class="w-10 text-center bg-black/40 border border-gray-700 rounded py-1 text-xs focus:border-cyan-400 outline-none"></td>
-                                <td class="py-3.5 text-center"><input type="number" value="6" min="0" max="10" onchange="updateScores()" class="w-10 text-center bg-black/40 border border-gray-700 rounded py-1 text-xs focus:border-cyan-400 outline-none"></td>
-                                <td class="py-3.5 text-center"><input type="number" value="0" min="0" max="10" onchange="updateScores()" class="w-10 text-center bg-black/40 border border-gray-700 rounded py-1 text-xs focus:border-cyan-400 outline-none"></td>
-                                <td class="py-3.5 text-center"><input type="number" value="0" min="0" max="10" onchange="updateScores()" class="w-10 text-center bg-black/40 border border-gray-700 rounded py-1 text-xs focus:border-cyan-400 outline-none"></td>
+                                <td class="py-3.5 text-center"><input type="number" value="8" min="0" max="10" oninput="updateScores()" class="w-10 text-center bg-black/40 border border-gray-700 rounded py-1 text-xs focus:border-cyan-400 outline-none"></td>
+                                <td class="py-3.5 text-center"><input type="number" value="10" min="0" max="10" oninput="updateScores()" class="w-10 text-center bg-black/40 border border-gray-700 rounded py-1 text-xs focus:border-cyan-400 outline-none"></td>
+                                <td class="py-3.5 text-center"><input type="number" value="6" min="0" max="10" oninput="updateScores()" class="w-10 text-center bg-black/40 border border-gray-700 rounded py-1 text-xs focus:border-cyan-400 outline-none"></td>
+                                <td class="py-3.5 text-center"><input type="number" value="0" min="0" max="10" oninput="updateScores()" class="w-10 text-center bg-black/40 border border-gray-700 rounded py-1 text-xs focus:border-cyan-400 outline-none"></td>
+                                <td class="py-3.5 text-center"><input type="number" value="0" min="0" max="10" oninput="updateScores()" class="w-10 text-center bg-black/40 border border-gray-700 rounded py-1 text-xs focus:border-cyan-400 outline-none"></td>
                                 <td class="py-3.5 text-right pr-2 font-black orbitron text-cyan-400 text-base score-total">24</td>
                             </tr>
-                            <!-- Player 3 -->
                             <tr class="hover:bg-white/5 transition-colors group">
                                 <td class="py-3.5 pl-2 font-bold orbitron text-amber-600 flex items-center space-x-2">
                                     <span class="w-6 h-6 rounded bg-amber-700/20 border border-amber-600/40 flex items-center justify-center text-xs">3</span>
@@ -405,14 +287,13 @@
                                         <span>Neon_Drifter</span>
                                     </div>
                                 </td>
-                                <td class="py-3.5 text-center"><input type="number" value="6" min="0" max="10" onchange="updateScores()" class="w-10 text-center bg-black/40 border border-gray-700 rounded py-1 text-xs focus:border-cyan-400 outline-none"></td>
-                                <td class="py-3.5 text-center"><input type="number" value="6" min="0" max="10" onchange="updateScores()" class="w-10 text-center bg-black/40 border border-gray-700 rounded py-1 text-xs focus:border-cyan-400 outline-none"></td>
-                                <td class="py-3.5 text-center"><input type="number" value="8" min="0" max="10" onchange="updateScores()" class="w-10 text-center bg-black/40 border border-gray-700 rounded py-1 text-xs focus:border-cyan-400 outline-none"></td>
-                                <td class="py-3.5 text-center"><input type="number" value="0" min="0" max="10" onchange="updateScores()" class="w-10 text-center bg-black/40 border border-gray-700 rounded py-1 text-xs focus:border-cyan-400 outline-none"></td>
-                                <td class="py-3.5 text-center"><input type="number" value="0" min="0" max="10" onchange="updateScores()" class="w-10 text-center bg-black/40 border border-gray-700 rounded py-1 text-xs focus:border-cyan-400 outline-none"></td>
+                                <td class="py-3.5 text-center"><input type="number" value="6" min="0" max="10" oninput="updateScores()" class="w-10 text-center bg-black/40 border border-gray-700 rounded py-1 text-xs focus:border-cyan-400 outline-none"></td>
+                                <td class="py-3.5 text-center"><input type="number" value="6" min="0" max="10" oninput="updateScores()" class="w-10 text-center bg-black/40 border border-gray-700 rounded py-1 text-xs focus:border-cyan-400 outline-none"></td>
+                                <td class="py-3.5 text-center"><input type="number" value="8" min="0" max="10" oninput="updateScores()" class="w-10 text-center bg-black/40 border border-gray-700 rounded py-1 text-xs focus:border-cyan-400 outline-none"></td>
+                                <td class="py-3.5 text-center"><input type="number" value="0" min="0" max="10" oninput="updateScores()" class="w-10 text-center bg-black/40 border border-gray-700 rounded py-1 text-xs focus:border-cyan-400 outline-none"></td>
+                                <td class="py-3.5 text-center"><input type="number" value="0" min="0" max="10" oninput="updateScores()" class="w-10 text-center bg-black/40 border border-gray-700 rounded py-1 text-xs focus:border-cyan-400 outline-none"></td>
                                 <td class="py-3.5 text-right pr-2 font-black orbitron text-cyan-400 text-base score-total">20</td>
                             </tr>
-                            <!-- Player 4 -->
                             <tr class="hover:bg-white/5 transition-colors group">
                                 <td class="py-3.5 pl-2 font-bold orbitron text-gray-500 flex items-center space-x-2">
                                     <span class="w-6 h-6 rounded bg-gray-800 border border-gray-700 flex items-center justify-center text-xs">4</span>
@@ -423,11 +304,11 @@
                                         <span>Speed_Demon</span>
                                     </div>
                                 </td>
-                                <td class="py-3.5 text-center"><input type="number" value="4" min="0" max="10" onchange="updateScores()" class="w-10 text-center bg-black/40 border border-gray-700 rounded py-1 text-xs focus:border-cyan-400 outline-none"></td>
-                                <td class="py-3.5 text-center"><input type="number" value="4" min="0" max="10" onchange="updateScores()" class="w-10 text-center bg-black/40 border border-gray-700 rounded py-1 text-xs focus:border-cyan-400 outline-none"></td>
-                                <td class="py-3.5 text-center"><input type="number" value="4" min="0" max="10" onchange="updateScores()" class="w-10 text-center bg-black/40 border border-gray-700 rounded py-1 text-xs focus:border-cyan-400 outline-none"></td>
-                                <td class="py-3.5 text-center"><input type="number" value="0" min="0" max="10" onchange="updateScores()" class="w-10 text-center bg-black/40 border border-gray-700 rounded py-1 text-xs focus:border-cyan-400 outline-none"></td>
-                                <td class="py-3.5 text-center"><input type="number" value="0" min="0" max="10" onchange="updateScores()" class="w-10 text-center bg-black/40 border border-gray-700 rounded py-1 text-xs focus:border-cyan-400 outline-none"></td>
+                                <td class="py-3.5 text-center"><input type="number" value="4" min="0" max="10" oninput="updateScores()" class="w-10 text-center bg-black/40 border border-gray-700 rounded py-1 text-xs focus:border-cyan-400 outline-none"></td>
+                                <td class="py-3.5 text-center"><input type="number" value="4" min="0" max="10" oninput="updateScores()" class="w-10 text-center bg-black/40 border border-gray-700 rounded py-1 text-xs focus:border-cyan-400 outline-none"></td>
+                                <td class="py-3.5 text-center"><input type="number" value="4" min="0" max="10" oninput="updateScores()" class="w-10 text-center bg-black/40 border border-gray-700 rounded py-1 text-xs focus:border-cyan-400 outline-none"></td>
+                                <td class="py-3.5 text-center"><input type="number" value="0" min="0" max="10" oninput="updateScores()" class="w-10 text-center bg-black/40 border border-gray-700 rounded py-1 text-xs focus:border-cyan-400 outline-none"></td>
+                                <td class="py-3.5 text-center"><input type="number" value="0" min="0" max="10" oninput="updateScores()" class="w-10 text-center bg-black/40 border border-gray-700 rounded py-1 text-xs focus:border-cyan-400 outline-none"></td>
                                 <td class="py-3.5 text-right pr-2 font-black orbitron text-cyan-400 text-base score-total">12</td>
                             </tr>
                         </tbody>
@@ -437,7 +318,6 @@
 
             <!-- GROUP B -->
             <div class="glass-panel rounded-2xl overflow-hidden border border-cyan-500/20 shadow-lg shadow-cyan-950/20 group-card" id="group-b-card">
-                <!-- Group Header -->
                 <div class="bg-gradient-to-r from-cyan-900/40 to-transparent p-4 border-b border-white/5 flex items-center justify-between">
                     <div class="flex items-center space-x-3">
                         <div class="w-9 h-9 rounded-lg bg-cyan-500 flex items-center justify-center text-black font-black orbitron text-lg shadow-neon-cyan">
@@ -453,7 +333,6 @@
                     </span>
                 </div>
 
-                <!-- Table Content -->
                 <div class="p-4 overflow-x-auto">
                     <table class="w-full text-left text-sm">
                         <thead>
@@ -469,7 +348,6 @@
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-800/50" id="group-b-body">
-                            <!-- Player 1 -->
                             <tr class="hover:bg-white/5 transition-colors group">
                                 <td class="py-3.5 pl-2 font-bold orbitron text-yellow-400 flex items-center space-x-2">
                                     <span class="w-6 h-6 rounded bg-yellow-500/20 border border-yellow-500/40 flex items-center justify-center text-xs">1</span>
@@ -480,14 +358,13 @@
                                         <span>Hyper_Apex</span>
                                     </div>
                                 </td>
-                                <td class="py-3.5 text-center"><input type="number" value="10" min="0" max="10" onchange="updateScores()" class="w-10 text-center bg-black/40 border border-gray-700 rounded py-1 text-xs focus:border-cyan-400 outline-none"></td>
-                                <td class="py-3.5 text-center"><input type="number" value="10" min="0" max="10" onchange="updateScores()" class="w-10 text-center bg-black/40 border border-gray-700 rounded py-1 text-xs focus:border-cyan-400 outline-none"></td>
-                                <td class="py-3.5 text-center"><input type="number" value="8" min="0" max="10" onchange="updateScores()" class="w-10 text-center bg-black/40 border border-gray-700 rounded py-1 text-xs focus:border-cyan-400 outline-none"></td>
-                                <td class="py-3.5 text-center"><input type="number" value="0" min="0" max="10" onchange="updateScores()" class="w-10 text-center bg-black/40 border border-gray-700 rounded py-1 text-xs focus:border-cyan-400 outline-none"></td>
-                                <td class="py-3.5 text-center"><input type="number" value="0" min="0" max="10" onchange="updateScores()" class="w-10 text-center bg-black/40 border border-gray-700 rounded py-1 text-xs focus:border-cyan-400 outline-none"></td>
+                                <td class="py-3.5 text-center"><input type="number" value="10" min="0" max="10" oninput="updateScores()" class="w-10 text-center bg-black/40 border border-gray-700 rounded py-1 text-xs focus:border-cyan-400 outline-none"></td>
+                                <td class="py-3.5 text-center"><input type="number" value="10" min="0" max="10" oninput="updateScores()" class="w-10 text-center bg-black/40 border border-gray-700 rounded py-1 text-xs focus:border-cyan-400 outline-none"></td>
+                                <td class="py-3.5 text-center"><input type="number" value="8" min="0" max="10" oninput="updateScores()" class="w-10 text-center bg-black/40 border border-gray-700 rounded py-1 text-xs focus:border-cyan-400 outline-none"></td>
+                                <td class="py-3.5 text-center"><input type="number" value="0" min="0" max="10" oninput="updateScores()" class="w-10 text-center bg-black/40 border border-gray-700 rounded py-1 text-xs focus:border-cyan-400 outline-none"></td>
+                                <td class="py-3.5 text-center"><input type="number" value="0" min="0" max="10" oninput="updateScores()" class="w-10 text-center bg-black/40 border border-gray-700 rounded py-1 text-xs focus:border-cyan-400 outline-none"></td>
                                 <td class="py-3.5 text-right pr-2 font-black orbitron text-cyan-400 text-base score-total">28</td>
                             </tr>
-                            <!-- Player 2 -->
                             <tr class="hover:bg-white/5 transition-colors group">
                                 <td class="py-3.5 pl-2 font-bold orbitron text-gray-300 flex items-center space-x-2">
                                     <span class="w-6 h-6 rounded bg-gray-400/20 border border-gray-400/40 flex items-center justify-center text-xs">2</span>
@@ -498,14 +375,13 @@
                                         <span>Phantom_Nitro</span>
                                     </div>
                                 </td>
-                                <td class="py-3.5 text-center"><input type="number" value="8" min="0" max="10" onchange="updateScores()" class="w-10 text-center bg-black/40 border border-gray-700 rounded py-1 text-xs focus:border-cyan-400 outline-none"></td>
-                                <td class="py-3.5 text-center"><input type="number" value="8" min="0" max="10" onchange="updateScores()" class="w-10 text-center bg-black/40 border border-gray-700 rounded py-1 text-xs focus:border-cyan-400 outline-none"></td>
-                                <td class="py-3.5 text-center"><input type="number" value="10" min="0" max="10" onchange="updateScores()" class="w-10 text-center bg-black/40 border border-gray-700 rounded py-1 text-xs focus:border-cyan-400 outline-none"></td>
-                                <td class="py-3.5 text-center"><input type="number" value="0" min="0" max="10" onchange="updateScores()" class="w-10 text-center bg-black/40 border border-gray-700 rounded py-1 text-xs focus:border-cyan-400 outline-none"></td>
-                                <td class="py-3.5 text-center"><input type="number" value="0" min="0" max="10" onchange="updateScores()" class="w-10 text-center bg-black/40 border border-gray-700 rounded py-1 text-xs focus:border-cyan-400 outline-none"></td>
+                                <td class="py-3.5 text-center"><input type="number" value="8" min="0" max="10" oninput="updateScores()" class="w-10 text-center bg-black/40 border border-gray-700 rounded py-1 text-xs focus:border-cyan-400 outline-none"></td>
+                                <td class="py-3.5 text-center"><input type="number" value="8" min="0" max="10" oninput="updateScores()" class="w-10 text-center bg-black/40 border border-gray-700 rounded py-1 text-xs focus:border-cyan-400 outline-none"></td>
+                                <td class="py-3.5 text-center"><input type="number" value="10" min="0" max="10" oninput="updateScores()" class="w-10 text-center bg-black/40 border border-gray-700 rounded py-1 text-xs focus:border-cyan-400 outline-none"></td>
+                                <td class="py-3.5 text-center"><input type="number" value="0" min="0" max="10" oninput="updateScores()" class="w-10 text-center bg-black/40 border border-gray-700 rounded py-1 text-xs focus:border-cyan-400 outline-none"></td>
+                                <td class="py-3.5 text-center"><input type="number" value="0" min="0" max="10" oninput="updateScores()" class="w-10 text-center bg-black/40 border border-gray-700 rounded py-1 text-xs focus:border-cyan-400 outline-none"></td>
                                 <td class="py-3.5 text-right pr-2 font-black orbitron text-cyan-400 text-base score-total">26</td>
                             </tr>
-                            <!-- Player 3 -->
                             <tr class="hover:bg-white/5 transition-colors group">
                                 <td class="py-3.5 pl-2 font-bold orbitron text-amber-600 flex items-center space-x-2">
                                     <span class="w-6 h-6 rounded bg-amber-700/20 border border-amber-600/40 flex items-center justify-center text-xs">3</span>
@@ -516,14 +392,13 @@
                                         <span>Turbo_Boost</span>
                                     </div>
                                 </td>
-                                <td class="py-3.5 text-center"><input type="number" value="6" min="0" max="10" onchange="updateScores()" class="w-10 text-center bg-black/40 border border-gray-700 rounded py-1 text-xs focus:border-cyan-400 outline-none"></td>
-                                <td class="py-3.5 text-center"><input type="number" value="6" min="0" max="10" onchange="updateScores()" class="w-10 text-center bg-black/40 border border-gray-700 rounded py-1 text-xs focus:border-cyan-400 outline-none"></td>
-                                <td class="py-3.5 text-center"><input type="number" value="4" min="0" max="10" onchange="updateScores()" class="w-10 text-center bg-black/40 border border-gray-700 rounded py-1 text-xs focus:border-cyan-400 outline-none"></td>
-                                <td class="py-3.5 text-center"><input type="number" value="0" min="0" max="10" onchange="updateScores()" class="w-10 text-center bg-black/40 border border-gray-700 rounded py-1 text-xs focus:border-cyan-400 outline-none"></td>
-                                <td class="py-3.5 text-center"><input type="number" value="0" min="0" max="10" onchange="updateScores()" class="w-10 text-center bg-black/40 border border-gray-700 rounded py-1 text-xs focus:border-cyan-400 outline-none"></td>
+                                <td class="py-3.5 text-center"><input type="number" value="6" min="0" max="10" oninput="updateScores()" class="w-10 text-center bg-black/40 border border-gray-700 rounded py-1 text-xs focus:border-cyan-400 outline-none"></td>
+                                <td class="py-3.5 text-center"><input type="number" value="6" min="0" max="10" oninput="updateScores()" class="w-10 text-center bg-black/40 border border-gray-700 rounded py-1 text-xs focus:border-cyan-400 outline-none"></td>
+                                <td class="py-3.5 text-center"><input type="number" value="4" min="0" max="10" oninput="updateScores()" class="w-10 text-center bg-black/40 border border-gray-700 rounded py-1 text-xs focus:border-cyan-400 outline-none"></td>
+                                <td class="py-3.5 text-center"><input type="number" value="0" min="0" max="10" oninput="updateScores()" class="w-10 text-center bg-black/40 border border-gray-700 rounded py-1 text-xs focus:border-cyan-400 outline-none"></td>
+                                <td class="py-3.5 text-center"><input type="number" value="0" min="0" max="10" oninput="updateScores()" class="w-10 text-center bg-black/40 border border-gray-700 rounded py-1 text-xs focus:border-cyan-400 outline-none"></td>
                                 <td class="py-3.5 text-right pr-2 font-black orbitron text-cyan-400 text-base score-total">16</td>
                             </tr>
-                            <!-- Player 4 -->
                             <tr class="hover:bg-white/5 transition-colors group">
                                 <td class="py-3.5 pl-2 font-bold orbitron text-gray-500 flex items-center space-x-2">
                                     <span class="w-6 h-6 rounded bg-gray-800 border border-gray-700 flex items-center justify-center text-xs">4</span>
@@ -534,11 +409,11 @@
                                         <span>Vortex_Viper</span>
                                     </div>
                                 </td>
-                                <td class="py-3.5 text-center"><input type="number" value="4" min="0" max="10" onchange="updateScores()" class="w-10 text-center bg-black/40 border border-gray-700 rounded py-1 text-xs focus:border-cyan-400 outline-none"></td>
-                                <td class="py-3.5 text-center"><input type="number" value="4" min="0" max="10" onchange="updateScores()" class="w-10 text-center bg-black/40 border border-gray-700 rounded py-1 text-xs focus:border-cyan-400 outline-none"></td>
-                                <td class="py-3.5 text-center"><input type="number" value="6" min="0" max="10" onchange="updateScores()" class="w-10 text-center bg-black/40 border border-gray-700 rounded py-1 text-xs focus:border-cyan-400 outline-none"></td>
-                                <td class="py-3.5 text-center"><input type="number" value="0" min="0" max="10" onchange="updateScores()" class="w-10 text-center bg-black/40 border border-gray-700 rounded py-1 text-xs focus:border-cyan-400 outline-none"></td>
-                                <td class="py-3.5 text-center"><input type="number" value="0" min="0" max="10" onchange="updateScores()" class="w-10 text-center bg-black/40 border border-gray-700 rounded py-1 text-xs focus:border-cyan-400 outline-none"></td>
+                                <td class="py-3.5 text-center"><input type="number" value="4" min="0" max="10" oninput="updateScores()" class="w-10 text-center bg-black/40 border border-gray-700 rounded py-1 text-xs focus:border-cyan-400 outline-none"></td>
+                                <td class="py-3.5 text-center"><input type="number" value="4" min="0" max="10" oninput="updateScores()" class="w-10 text-center bg-black/40 border border-gray-700 rounded py-1 text-xs focus:border-cyan-400 outline-none"></td>
+                                <td class="py-3.5 text-center"><input type="number" value="6" min="0" max="10" oninput="updateScores()" class="w-10 text-center bg-black/40 border border-gray-700 rounded py-1 text-xs focus:border-cyan-400 outline-none"></td>
+                                <td class="py-3.5 text-center"><input type="number" value="0" min="0" max="10" oninput="updateScores()" class="w-10 text-center bg-black/40 border border-gray-700 rounded py-1 text-xs focus:border-cyan-400 outline-none"></td>
+                                <td class="py-3.5 text-center"><input type="number" value="0" min="0" max="10" oninput="updateScores()" class="w-10 text-center bg-black/40 border border-gray-700 rounded py-1 text-xs focus:border-cyan-400 outline-none"></td>
                                 <td class="py-3.5 text-right pr-2 font-black orbitron text-cyan-400 text-base score-total">14</td>
                             </tr>
                         </tbody>
@@ -553,7 +428,7 @@
             <div class="flex flex-col md:flex-row items-center justify-between gap-4">
                 <div class="flex items-center space-x-4">
                     <div class="w-12 h-12 rounded-xl bg-yellow-500/20 border border-yellow-500/40 flex items-center justify-center text-yellow-400 text-xl font-bold shadow-neon-gold">
-                        <i class="fa-solid me-1 fa-trophy"></i>
+                        <i class="fa-solid fa-trophy"></i>
                     </div>
                     <div>
                         <h3 class="orbitron font-bold text-lg text-white">DANH SÁCH VÀO VÒNG CHUNG KẾT (TOP 4)</h3>
@@ -563,36 +438,12 @@
 
                 <div class="flex items-center space-x-3 w-full md:w-auto overflow-x-auto pb-2 md:pb-0" id="qualified-players-list">
                     <!-- Dynamic rendering -->
-                    <div class="px-3 py-2 rounded-lg bg-black/40 border border-purple-500/40 flex items-center space-x-2 shrink-0">
-                        <span class="w-2 h-2 rounded-full bg-purple-400"></span>
-                        <span class="text-xs font-bold text-gray-200">Storm_Racer</span>
-                        <span class="text-[10px] bg-purple-900/50 text-purple-300 px-1.5 py-0.5 rounded orbitron">A1</span>
-                    </div>
-
-                    <div class="px-3 py-2 rounded-lg bg-black/40 border border-purple-500/40 flex items-center space-x-2 shrink-0">
-                        <span class="w-2 h-2 rounded-full bg-purple-400"></span>
-                        <span class="text-xs font-bold text-gray-200">Shadow_King</span>
-                        <span class="text-[10px] bg-purple-900/50 text-purple-300 px-1.5 py-0.5 rounded orbitron">A2</span>
-                    </div>
-
-                    <div class="px-3 py-2 rounded-lg bg-black/40 border border-cyan-500/40 flex items-center space-x-2 shrink-0">
-                        <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
-                        <span class="text-xs font-bold text-gray-200">Hyper_Apex</span>
-                        <span class="text-[10px] bg-cyan-900/50 text-cyan-300 px-1.5 py-0.5 rounded orbitron">B1</span>
-                    </div>
-
-                    <div class="px-3 py-2 rounded-lg bg-black/40 border border-cyan-500/40 flex items-center space-x-2 shrink-0">
-                        <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
-                        <span class="text-xs font-bold text-gray-200">Phantom_Nitro</span>
-                        <span class="text-[10px] bg-cyan-900/50 text-cyan-300 px-1.5 py-0.5 rounded orbitron">B2</span>
-                    </div>
                 </div>
             </div>
         </div>
 
     </main>
 
-    <!-- Footer -->
     <footer class="glass-panel border-t border-white/5 py-4 mt-8">
         <div class="max-w-7xl mx-auto px-4 text-center text-xs text-gray-500 flex flex-col sm:flex-row items-center justify-between gap-2">
             <div>
@@ -643,14 +494,12 @@
                     row.querySelector('.score-total').textContent = total;
                 });
 
-                // Sort rows by total score descending
                 rows.sort((a, b) => {
                     const scoreA = parseInt(a.querySelector('.score-total').textContent);
                     const scoreB = parseInt(b.querySelector('.score-total').textContent);
                     return scoreB - scoreA;
                 });
 
-                // Re-append sorted rows and update rank badges
                 rows.forEach((row, index) => {
                     tbody.appendChild(row);
                     const rankBadge = row.querySelector('td span');
@@ -665,11 +514,16 @@
             const groupABody = document.getElementById('group-a-body');
             const groupBBody = document.getElementById('group-b-body');
 
-            const a1 = groupABody.querySelectorAll('tr')[0].querySelector('td:nth-child(2) span:last-child').textContent;
-            const a2 = groupABody.querySelectorAll('tr')[1].querySelector('td:nth-child(2) span:last-child').textContent;
+            const rowsA = groupABody.querySelectorAll('tr');
+            const rowsB = groupBBody.querySelectorAll('tr');
+
+            if (rowsA.length < 2 || rowsB.length < 2) return;
+
+            const a1 = rowsA[0].querySelector('td:nth-child(2) span:last-child').textContent;
+            const a2 = rowsA[1].querySelector('td:nth-child(2) span:last-child').textContent;
             
-            const b1 = groupBBody.querySelectorAll('tr')[0].querySelector('td:nth-child(2) span:last-child').textContent;
-            const b2 = groupBBody.querySelectorAll('tr')[1].querySelector('td:nth-child(2) span:last-child').textContent;
+            const b1 = rowsB[0].querySelector('td:nth-child(2) span:last-child').textContent;
+            const b2 = rowsB[1].querySelector('td:nth-child(2) span:last-child').textContent;
 
             const listContainer = document.getElementById('qualified-players-list');
             listContainer.innerHTML = `
@@ -724,7 +578,6 @@
                     nameSpan.textContent = player;
                     avatarSpan.textContent = `${prefix}${idx+1}`;
                     
-                    // Reset scores inputs
                     const inputs = rows[idx].querySelectorAll('input[type="number"]');
                     inputs.forEach(input => input.value = 0);
                 }
@@ -736,6 +589,15 @@
             inputs.forEach(input => input.value = 0);
             updateScores();
         }
+
+        function exportScores() {
+            alert('Đã xuất kết quả bảng đấu thành công!');
+        }
+
+        // Initialize qualified list on load
+        document.addEventListener('DOMContentLoaded', () => {
+            updateScores();
+        });
     </script>
 </body>
 </html>
