@@ -359,6 +359,9 @@
                     <h2 class="orbitron text-base font-bold text-white tracking-wide">
                         SƠ ĐỒ BẢNG ĐẤU
                     </h2>
+                    <button type="button" onclick="openClanMembers()" class="px-3 py-2 rounded-xl text-xs font-black bg-pink-500/15 hover:bg-pink-500/25 text-pink-200 border border-pink-300/30 transition-all flex items-center gap-2">
+                        <i class="fa-solid fa-users"></i> TV CLAN
+                    </button>
                 </div>
 
                 <div class="flex flex-wrap items-center gap-2">
@@ -411,6 +414,63 @@
         </section>
 
     </main>
+
+    <!-- TV CLAN modal -->
+    <div id="clanMembersModal" class="fixed inset-0 z-[70] hidden items-center justify-center bg-black/75 backdrop-blur-sm p-4" onclick="if(event.target===this) closeClanMembers()">
+        <div class="glass-panel w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-2xl border border-pink-300/30 shadow-2xl">
+            <div class="sticky top-0 z-10 flex items-center justify-between gap-3 p-5 border-b border-white/10 bg-[#24283a]/95 backdrop-blur">
+                <div>
+                    <h3 class="orbitron text-lg font-black text-pink-200"><i class="fa-solid fa-users mr-2"></i>THÀNH VIÊN CLAN</h3>
+                    <p class="text-xs text-gray-400 mt-1">Tự thêm và quản lý thông tin thành viên StormyPetrel</p>
+                </div>
+                <button type="button" onclick="closeClanMembers()" class="w-9 h-9 rounded-lg bg-white/5 hover:bg-red-500/20 text-gray-300 hover:text-red-300"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <div class="p-5 space-y-5">
+                <form id="clanMemberForm" onsubmit="event.preventDefault(); saveClanMember();" class="rounded-xl border border-pink-300/20 bg-black/20 p-4 space-y-3">
+                    <div class="flex items-center justify-between gap-2">
+                        <h4 id="clanFormTitle" class="text-sm font-black text-pink-200">THÊM THÀNH VIÊN MỚI</h4>
+                        <span class="text-[10px] text-gray-500">Thông tin có thể chỉnh sửa sau</span>
+                    </div>
+                    <input type="hidden" id="clanMemberEditId">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <label class="text-xs text-gray-300 font-bold">Tên ingame
+                            <input id="clanIngameName" required maxlength="40" placeholder="Tên trong game" class="mt-1 w-full rounded-lg border border-gray-700 bg-black/40 px-3 py-2.5 text-sm text-white outline-none focus:border-pink-300">
+                        </label>
+                        <label class="text-xs text-gray-300 font-bold">Tên Facebook
+                            <input id="clanFacebookName" maxlength="60" placeholder="Tên Facebook" class="mt-1 w-full rounded-lg border border-gray-700 bg-black/40 px-3 py-2.5 text-sm text-white outline-none focus:border-pink-300">
+                        </label>
+                        <label class="text-xs text-gray-300 font-bold">Năm sinh
+                            <input id="clanBirthYear" type="number" min="1900" max="2100" placeholder="Ví dụ: 2005" class="mt-1 w-full rounded-lg border border-gray-700 bg-black/40 px-3 py-2.5 text-sm text-white outline-none focus:border-pink-300">
+                        </label>
+                        <label class="text-xs text-gray-300 font-bold">Giới tính
+                            <select id="clanGender" class="mt-1 w-full rounded-lg border border-gray-700 bg-[#171923] px-3 py-2.5 text-sm text-white outline-none focus:border-pink-300">
+                                <option value="">Chưa cập nhật</option>
+                                <option value="Nam">Nam</option>
+                                <option value="Nữ">Nữ</option>
+                                <option value="Khác">Khác</option>
+                            </select>
+                        </label>
+                    </div>
+                    <div class="flex flex-wrap gap-2">
+                        <button id="clanSaveBtn" type="submit" class="px-4 py-2.5 rounded-lg bg-pink-400 hover:bg-pink-300 text-[#24283a] text-xs font-black"><i class="fa-solid fa-plus mr-1"></i> THÊM THÀNH VIÊN</button>
+                        <button id="clanCancelEditBtn" type="button" onclick="resetClanMemberForm()" class="hidden px-4 py-2.5 rounded-lg bg-gray-700 hover:bg-gray-600 text-white text-xs font-bold">HỦY CHỈNH SỬA</button>
+                    </div>
+                </form>
+
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                    <div>
+                        <h4 class="text-sm font-black text-white">DANH SÁCH THÀNH VIÊN</h4>
+                        <p id="clanMemberCount" class="text-[11px] text-gray-400 mt-1">0 thành viên</p>
+                    </div>
+                    <input id="clanMemberSearch" oninput="renderClanMembers()" placeholder="Tìm tên ingame / Facebook..." class="w-full sm:w-64 rounded-lg border border-gray-700 bg-black/40 px-3 py-2 text-xs text-white outline-none focus:border-pink-300">
+                </div>
+                <div id="clanMembersList" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div class="col-span-full rounded-xl border border-dashed border-gray-600 p-6 text-center text-sm text-gray-400">Chưa có thành viên. Thêm thành viên đầu tiên ở phía trên nhé!</div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
         <div class="glass-panel border border-cyan-500/50 text-white px-5 py-3 rounded-xl shadow-2xl flex items-center space-x-3">
@@ -1700,6 +1760,149 @@
             window.addEventListener('resize', updateTarget);
             updateTarget();
         })();
+    </script>
+
+
+    <script>
+        // TV CLAN: dữ liệu độc lập với sơ đồ giải đấu và được lưu trên trình duyệt.
+        const CLAN_MEMBERS_STORAGE_KEY = 'stormypetrel_clan_members_v1';
+        let clanMembers = [];
+        try {
+            const savedClanMembers = JSON.parse(localStorage.getItem(CLAN_MEMBERS_STORAGE_KEY) || '[]');
+            clanMembers = Array.isArray(savedClanMembers) ? savedClanMembers : [];
+        } catch (error) {
+            console.warn('Không thể đọc dữ liệu TV Clan:', error);
+            clanMembers = [];
+        }
+
+        function escapeClanHtml(value) {
+            return String(value ?? '').replace(/[&<>"']/g, char => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+            })[char]);
+        }
+
+        function openClanMembers() {
+            const modal = document.getElementById('clanMembersModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            renderClanMembers();
+        }
+
+        function closeClanMembers() {
+            const modal = document.getElementById('clanMembersModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function persistClanMembers() {
+            localStorage.setItem(CLAN_MEMBERS_STORAGE_KEY, JSON.stringify(clanMembers));
+        }
+
+        function resetClanMemberForm() {
+            document.getElementById('clanMemberForm').reset();
+            document.getElementById('clanMemberEditId').value = '';
+            document.getElementById('clanFormTitle').textContent = 'THÊM THÀNH VIÊN MỚI';
+            document.getElementById('clanSaveBtn').innerHTML = '<i class="fa-solid fa-plus mr-1"></i> THÊM THÀNH VIÊN';
+            document.getElementById('clanCancelEditBtn').classList.add('hidden');
+        }
+
+        function saveClanMember() {
+            const ingameName = document.getElementById('clanIngameName').value.trim();
+            const facebookName = document.getElementById('clanFacebookName').value.trim();
+            const birthYearRaw = document.getElementById('clanBirthYear').value.trim();
+            const gender = document.getElementById('clanGender').value;
+            const editId = document.getElementById('clanMemberEditId').value;
+
+            if (!ingameName) {
+                showToast('Vui lòng nhập tên ingame.', 'error');
+                return;
+            }
+
+            const birthYear = birthYearRaw ? Number(birthYearRaw) : '';
+            if (birthYearRaw && (!Number.isInteger(birthYear) || birthYear < 1900 || birthYear > 2100)) {
+                showToast('Năm sinh không hợp lệ.', 'error');
+                return;
+            }
+
+            const memberData = { ingameName, facebookName, birthYear, gender };
+            if (editId) {
+                const index = clanMembers.findIndex(member => member.id === editId);
+                if (index !== -1) clanMembers[index] = { ...clanMembers[index], ...memberData };
+                showToast('Đã cập nhật thông tin thành viên.', 'success');
+            } else {
+                clanMembers.push({ id: `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`, ...memberData });
+                showToast('Đã thêm thành viên vào clan.', 'success');
+            }
+
+            persistClanMembers();
+            resetClanMemberForm();
+            renderClanMembers();
+        }
+
+        function editClanMember(id) {
+            const member = clanMembers.find(item => item.id === id);
+            if (!member) return;
+            document.getElementById('clanMemberEditId').value = member.id;
+            document.getElementById('clanIngameName').value = member.ingameName || '';
+            document.getElementById('clanFacebookName').value = member.facebookName || '';
+            document.getElementById('clanBirthYear').value = member.birthYear || '';
+            document.getElementById('clanGender').value = member.gender || '';
+            document.getElementById('clanFormTitle').textContent = 'CHỈNH SỬA THÀNH VIÊN';
+            document.getElementById('clanSaveBtn').innerHTML = '<i class="fa-solid fa-floppy-disk mr-1"></i> LƯU THAY ĐỔI';
+            document.getElementById('clanCancelEditBtn').classList.remove('hidden');
+            document.getElementById('clanIngameName').focus();
+        }
+
+        function deleteClanMember(id) {
+            const member = clanMembers.find(item => item.id === id);
+            if (!member || !confirm(`Xóa thành viên "${member.ingameName}" khỏi danh sách TV Clan?`)) return;
+            clanMembers = clanMembers.filter(item => item.id !== id);
+            persistClanMembers();
+            renderClanMembers();
+            if (document.getElementById('clanMemberEditId').value === id) resetClanMemberForm();
+            showToast('Đã xóa thành viên.', 'success');
+        }
+
+        function renderClanMembers() {
+            const list = document.getElementById('clanMembersList');
+            if (!list) return;
+            const keyword = (document.getElementById('clanMemberSearch')?.value || '').trim().toLocaleLowerCase('vi');
+            const filtered = clanMembers.filter(member =>
+                `${member.ingameName || ''} ${member.facebookName || ''}`.toLocaleLowerCase('vi').includes(keyword)
+            );
+
+            document.getElementById('clanMemberCount').textContent =
+                `${clanMembers.length} thành viên${keyword ? ` · tìm thấy ${filtered.length}` : ''}`;
+
+            if (!filtered.length) {
+                list.innerHTML = `<div class="col-span-full rounded-xl border border-dashed border-gray-600 p-6 text-center text-sm text-gray-400">${clanMembers.length ? 'Không tìm thấy thành viên phù hợp.' : 'Chưa có thành viên. Thêm thành viên đầu tiên ở phía trên nhé!'}</div>`;
+                return;
+            }
+
+            list.innerHTML = filtered.map(member => `
+                <article class="rounded-xl border border-pink-200/20 bg-black/25 p-4 hover:border-pink-200/50 transition-colors">
+                    <div class="flex items-start justify-between gap-2">
+                        <div class="min-w-0">
+                            <div class="text-[10px] uppercase tracking-wider text-pink-200/80 font-bold">Tên ingame</div>
+                            <h5 class="text-base font-black text-white break-words">${escapeClanHtml(member.ingameName || 'Chưa cập nhật')}</h5>
+                        </div>
+                        <span class="shrink-0 rounded-full bg-pink-300/10 px-2.5 py-1 text-[10px] font-bold text-pink-200">${escapeClanHtml(member.gender || 'Chưa rõ')}</span>
+                    </div>
+                    <div class="mt-3 space-y-2 text-xs">
+                        <div class="flex gap-2"><span class="w-24 shrink-0 text-gray-500">Facebook</span><span class="text-gray-200 break-words">${escapeClanHtml(member.facebookName || 'Chưa cập nhật')}</span></div>
+                        <div class="flex gap-2"><span class="w-24 shrink-0 text-gray-500">Năm sinh</span><span class="text-gray-200">${escapeClanHtml(member.birthYear || 'Chưa cập nhật')}</span></div>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-white/10 flex justify-end gap-2">
+                        <button type="button" onclick="editClanMember('${escapeClanHtml(member.id)}')" class="px-3 py-1.5 rounded-lg bg-cyan-400/10 hover:bg-cyan-400/20 text-cyan-200 text-[11px] font-bold"><i class="fa-solid fa-pen mr-1"></i>Sửa</button>
+                        <button type="button" onclick="deleteClanMember('${escapeClanHtml(member.id)}')" class="px-3 py-1.5 rounded-lg bg-red-400/10 hover:bg-red-400/20 text-red-200 text-[11px] font-bold"><i class="fa-solid fa-trash mr-1"></i>Xóa</button>
+                    </div>
+                </article>
+            `).join('');
+        }
+
+        document.addEventListener('keydown', event => {
+            if (event.key === 'Escape') closeClanMembers();
+        });
     </script>
 
 </body>
