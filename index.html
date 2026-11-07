@@ -1794,6 +1794,11 @@
             modal.classList.remove('flex');
         }
 
+        // Expose handlers explicitly for buttons using inline onclick.
+        // This keeps the TV Clan controls clickable in browsers that isolate script scopes.
+        window.openClanMembers = openClanMembers;
+        window.closeClanMembers = closeClanMembers;
+
         function persistClanMembers() {
             localStorage.setItem(CLAN_MEMBERS_STORAGE_KEY, JSON.stringify(clanMembers));
         }
