@@ -452,6 +452,19 @@
                             </select>
                         </label>
                     </div>
+                    <div class="rounded-lg border border-cyan-300/15 bg-cyan-300/5 p-3">
+                        <div class="mb-2 text-xs font-black text-cyan-200"><i class="fa-solid fa-flag-checkered mr-1"></i> ĐUA ĐỘI</div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <label class="flex items-center gap-2 rounded-lg bg-black/20 px-3 py-2.5 text-xs text-gray-200 cursor-pointer">
+                                <input id="clanTeamRaceThisWeek" type="checkbox" class="h-4 w-4 accent-emerald-400">
+                                <span>Tuần này có đua đội</span>
+                            </label>
+                            <label class="flex items-center gap-2 rounded-lg bg-black/20 px-3 py-2.5 text-xs text-gray-200 cursor-pointer">
+                                <input id="clanTeamRaceLastWeek" type="checkbox" class="h-4 w-4 accent-emerald-400">
+                                <span>Tuần trước có đua đội</span>
+                            </label>
+                        </div>
+                    </div>
                     <div class="flex flex-wrap gap-2">
                         <button id="clanSaveBtn" type="submit" class="px-4 py-2.5 rounded-lg bg-pink-400 hover:bg-pink-300 text-[#24283a] text-xs font-black"><i class="fa-solid fa-plus mr-1"></i> THÊM THÀNH VIÊN</button>
                         <button id="clanCancelEditBtn" type="button" onclick="resetClanMemberForm()" class="hidden px-4 py-2.5 rounded-lg bg-gray-700 hover:bg-gray-600 text-white text-xs font-bold">HỦY CHỈNH SỬA</button>
@@ -1816,6 +1829,8 @@
             const facebookName = document.getElementById('clanFacebookName').value.trim();
             const birthYearRaw = document.getElementById('clanBirthYear').value.trim();
             const gender = document.getElementById('clanGender').value;
+            const teamRaceThisWeek = document.getElementById('clanTeamRaceThisWeek').checked;
+            const teamRaceLastWeek = document.getElementById('clanTeamRaceLastWeek').checked;
             const editId = document.getElementById('clanMemberEditId').value;
 
             if (!ingameName) {
@@ -1829,7 +1844,7 @@
                 return;
             }
 
-            const memberData = { ingameName, facebookName, birthYear, gender };
+            const memberData = { ingameName, facebookName, birthYear, gender, teamRaceThisWeek, teamRaceLastWeek };
             if (editId) {
                 const index = clanMembers.findIndex(member => member.id === editId);
                 if (index !== -1) clanMembers[index] = { ...clanMembers[index], ...memberData };
@@ -1852,6 +1867,8 @@
             document.getElementById('clanFacebookName').value = member.facebookName || '';
             document.getElementById('clanBirthYear').value = member.birthYear || '';
             document.getElementById('clanGender').value = member.gender || '';
+            document.getElementById('clanTeamRaceThisWeek').checked = !!member.teamRaceThisWeek;
+            document.getElementById('clanTeamRaceLastWeek').checked = !!member.teamRaceLastWeek;
             document.getElementById('clanFormTitle').textContent = 'CHỈNH SỬA THÀNH VIÊN';
             document.getElementById('clanSaveBtn').innerHTML = '<i class="fa-solid fa-floppy-disk mr-1"></i> LƯU THAY ĐỔI';
             document.getElementById('clanCancelEditBtn').classList.remove('hidden');
@@ -1896,6 +1913,19 @@
                     <div class="mt-3 space-y-2 text-xs">
                         <div class="flex gap-2"><span class="w-24 shrink-0 text-gray-500">Facebook</span><span class="text-gray-200 break-words">${escapeClanHtml(member.facebookName || 'Chưa cập nhật')}</span></div>
                         <div class="flex gap-2"><span class="w-24 shrink-0 text-gray-500">Năm sinh</span><span class="text-gray-200">${escapeClanHtml(member.birthYear || 'Chưa cập nhật')}</span></div>
+                    </div>
+                    <div class="mt-3 rounded-lg border border-cyan-300/15 bg-cyan-300/5 p-3">
+                        <div class="mb-2 text-[10px] font-black uppercase tracking-wider text-cyan-200">Đua đội</div>
+                        <div class="grid grid-cols-2 gap-2 text-[11px]">
+                            <div class="flex items-center gap-2">
+                                <i class="fa-solid ${member.teamRaceThisWeek ? 'fa-circle-check text-emerald-400' : 'fa-circle-xmark text-gray-500'} text-sm"></i>
+                                <span class="${member.teamRaceThisWeek ? 'text-emerald-200' : 'text-gray-400'}">Tuần này</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <i class="fa-solid ${member.teamRaceLastWeek ? 'fa-circle-check text-emerald-400' : 'fa-circle-xmark text-gray-500'} text-sm"></i>
+                                <span class="${member.teamRaceLastWeek ? 'text-emerald-200' : 'text-gray-400'}">Tuần trước</span>
+                            </div>
+                        </div>
                     </div>
                     <div class="mt-4 pt-3 border-t border-white/10 flex justify-end gap-2">
                         <button type="button" onclick="editClanMember('${escapeClanHtml(member.id)}')" class="px-3 py-1.5 rounded-lg bg-cyan-400/10 hover:bg-cyan-400/20 text-cyan-200 text-[11px] font-bold"><i class="fa-solid fa-pen mr-1"></i>Sửa</button>
