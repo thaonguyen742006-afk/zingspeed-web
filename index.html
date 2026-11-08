@@ -476,7 +476,16 @@
                         <h4 class="text-sm font-black text-white">DANH SÁCH THÀNH VIÊN</h4>
                         <p id="clanMemberCount" class="text-[11px] text-gray-400 mt-1">0 thành viên</p>
                     </div>
-                    <input id="clanMemberSearch" oninput="renderClanMembers()" placeholder="Tìm tên ingame / Facebook..." class="w-full sm:w-64 rounded-lg border border-gray-700 bg-black/40 px-3 py-2 text-xs text-white outline-none focus:border-pink-300">
+                    <div class="flex flex-wrap gap-2 w-full sm:w-auto">
+                        <input id="clanMemberSearch" oninput="renderClanMembers()" placeholder="Tìm tên ingame / Facebook..." class="w-full sm:w-64 rounded-lg border border-gray-700 bg-black/40 px-3 py-2 text-xs text-white outline-none focus:border-pink-300">
+                        <select id="clanRaceFilter" onchange="renderClanMembers()" aria-label="Lọc thành viên theo đua đội" class="w-full sm:w-56 rounded-lg border border-gray-700 bg-[#171b2b] px-3 py-2 text-xs text-white outline-none focus:border-pink-300">
+                            <option value="all">Tất cả thành viên</option>
+                            <option value="both">Đua đội cả 2 tuần</option>
+                            <option value="thisWeek">Có đua đội tuần này</option>
+                            <option value="lastWeek">Có đua đội tuần trước</option>
+                            <option value="neither">Không đua đội cả 2 tuần</option>
+                        </select>
+                    </div>
                 </div>
                 <div id="clanMembersList" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div class="col-span-full rounded-xl border border-dashed border-gray-600 p-6 text-center text-sm text-gray-400">Chưa có thành viên. Thêm thành viên đầu tiên ở phía trên nhé!</div>
@@ -1912,12 +1921,24 @@
             const list = document.getElementById('clanMembersList');
             if (!list) return;
             const keyword = (document.getElementById('clanMemberSearch')?.value || '').trim().toLocaleLowerCase('vi');
-            const filtered = clanMembers.filter(member =>
-                `${member.ingameName || ''} ${member.facebookName || ''}`.toLocaleLowerCase('vi').includes(keyword)
-            );
+            const raceFilter = document.getElementById('clanRaceFilter')?.value || 'all';
+            const filtered = clanMembers.filter(member => {
+                const matchesSearch = `${member.ingameName || ''} ${member.facebookName || ''}`.toLocaleLowerCase('vi').includes(keyword);
+                const thisWeek = !!member.teamRaceThisWeek;
+                const lastWeek = !!member.teamRaceLastWeek;
+                let matchesRace = true;
 
+                if (raceFilter === 'both') matchesRace = thisWeek && lastWeek;
+                else if (raceFilter === 'thisWeek') matchesRace = thisWeek;
+                else if (raceFilter === 'lastWeek') matchesRace = lastWeek;
+                else if (raceFilter === 'neither') matchesRace = !thisWeek && !lastWeek;
+
+                return matchesSearch && matchesRace;
+            });
+
+            const hasActiveFilter = keyword || raceFilter !== 'all';
             document.getElementById('clanMemberCount').textContent =
-                `${clanMembers.length} thành viên${keyword ? ` · tìm thấy ${filtered.length}` : ''}`;
+                `${clanMembers.length} thành viên${hasActiveFilter ? ` · hiển thị ${filtered.length}` : ''}`;
 
             if (!filtered.length) {
                 list.innerHTML = `<div class="col-span-full rounded-xl border border-dashed border-gray-600 p-6 text-center text-sm text-gray-400">${clanMembers.length ? 'Không tìm thấy thành viên phù hợp.' : 'Chưa có thành viên. Thêm thành viên đầu tiên ở phía trên nhé!'}</div>`;
