@@ -416,7 +416,7 @@
     </main>
 
     <!-- TV CLAN modal -->
-    <div id="clanMembersModal" class="fixed inset-0 z-[70] hidden items-center justify-center bg-black/75 backdrop-blur-sm p-4" onclick="if(event.target===this) closeClanMembers()">
+    <div id="clanMembersModal" class="fixed inset-0 z-[99999] items-center justify-center bg-black/80 backdrop-blur-sm p-4" style="display:none; position:fixed; inset:0; z-index:99999; overflow-y:auto;" onclick="if(event.target===this) closeClanMembers()">
         <div class="glass-panel w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-2xl border border-pink-300/30 shadow-2xl">
             <div class="sticky top-0 z-10 flex items-center justify-between gap-3 p-5 border-b border-white/10 bg-[#24283a]/95 backdrop-blur">
                 <div>
@@ -1796,15 +1796,27 @@
 
         function openClanMembers() {
             const modal = document.getElementById('clanMembersModal');
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
+            if (!modal) return;
+
+            // Đưa modal ra thẳng body để luôn phủ toàn màn hình,
+            // không bị giới hạn bởi section/container của sơ đồ giải.
+            if (modal.parentElement !== document.body) {
+                document.body.appendChild(modal);
+            }
+
+            modal.style.display = 'flex';
+            modal.style.position = 'fixed';
+            modal.style.inset = '0';
+            modal.style.zIndex = '99999';
+            document.body.style.overflow = 'hidden';
             renderClanMembers();
         }
 
         function closeClanMembers() {
             const modal = document.getElementById('clanMembersModal');
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
+            if (!modal) return;
+            modal.style.display = 'none';
+            document.body.style.overflow = '';
         }
 
         // Expose handlers explicitly for buttons using inline onclick.
